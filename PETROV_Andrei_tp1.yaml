@@ -1,0 +1,526 @@
+openapi: "3.0.1"
+info:
+  version: 1.0.0
+  title: Tous Covid
+  description: API de l'application Tous Covid
+servers:
+  - url: http://touscovid.swagger.io/api
+paths:
+  /user:
+    post:
+      tags:
+      - user
+      summary: profile creation
+      operationId: profile-create
+      requestBody:
+        description: Profile object to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Profile'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Profile'
+        required: true
+      responses:
+        200:
+          description: Operation Succes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        400:
+          description: Invalid input
+          content: {}
+  /user/{user_id}/profile:
+    get:
+      tags:
+      - user
+      summary: get current user profile information
+      operationId: get-user-profile
+      parameters:
+      - name: user_id
+        in: path
+        description: 'profile id'
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Operation Succes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        400:
+          description: The profile does not exist or you are not allowed to see it
+          content: {}
+    put:
+      tags:
+      - user
+      summary: update profile 
+      operationId: profile-update
+      parameters:
+      - name: user_id
+        in: path
+        description: 'profile id'
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: Profil object to be updated
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Profile'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Profile'
+        required: true
+      responses:
+        200:
+          description: Operation Succes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+  /user/{user_id}/contacts:
+    get:
+      tags:
+      - user
+      summary: get contacts of current user
+      parameters:
+      - name: user_id
+        in: path
+        description: 'profile id'
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Operation Succes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Contact'
+  /user/{user_id}/contact/person_id/{person_id}:
+    post:
+      tags:
+      - user
+      summary: add a contact by id
+      parameters:
+      - name: user_id
+        in: path
+        description: 'profile id'
+        required: true
+        schema:
+          type: integer
+      - name: person_id
+        in: path
+        description: 'contact profile id'
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: Contact to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Contact'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Contact'
+        required: true
+      responses:
+        200:
+          description: Operation Succes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+  /user/{user_id}/contact/person_info:
+    post:
+      tags:
+      - user
+      summary: add a contact by email/first name/last name
+      parameters:
+      - name: user_id
+        in: path
+        description: 'profile id'
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: Contact to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactByInfo'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/ContactByInfo'
+        required: true
+      responses:
+        200:
+          description: Operation Succes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+  /user/{user_id}/contact/{contact_id}:
+    get:
+      tags:
+      - user
+      summary: get contact by id
+      parameters:
+      - name: user_id
+        in: path
+        description: 'user id'
+        required: true
+        schema:
+          type: integer
+      - name: contact_id
+        in: path
+        description: 'contact id of user to be added'
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Operation Succes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+    put:
+      tags:
+      - user
+      summary: contact-update
+      parameters:
+      - name: user_id
+        in: path
+        description: 'user id'
+        required: true
+        schema:
+          type: integer
+      - name: contact_id
+        in: path
+        description: 'contact id of user to be updated'
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: Contact to be updated
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Contact'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Contact'
+        required: true
+      responses:
+        200:
+          description: Operation Succes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+    delete:
+      tags:
+      - user
+      summary: contact-delete
+      parameters:
+      - name: user_id
+        in: path
+        description: 'user id'
+        required: true
+        schema:
+          type: integer
+      - name: contact_id
+        in: path
+        description: 'contact id of user to be deleted'
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Contact deleted
+  /user/{user_id}/positive:
+    post:
+      tags:
+      - user
+      summary: add covid positive statement
+      parameters:
+      - name: user_id
+        in: path
+        description: 'profile id '
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: Covid positive statement to be added 
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Covid-Positive-Statement'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Covid-Positive-Statement'
+        required: true
+      responses:
+        200:
+          description: Operation Succes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Covid-Positive-Statement'
+  
+  
+  
+  /admin/search/user/last-name/{last-name}:
+    get:
+      tags:
+      - admin
+      summary: get user by last name
+      parameters:
+      - name: last-name
+        in: path
+        description: 'last name of required user'
+        required: true
+        schema:
+          type: String
+      responses:
+        200:
+          description: Operation Succes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  /admin/search/user/lastname/{email}:
+    get:
+      tags:
+      - admin
+      summary: get user by email
+      parameters:
+      - name: email
+        in: path
+        description: 'email of required user'
+        required: true
+        schema:
+          type: String
+      responses:
+        200:
+          description: Operation Succes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  /admin/search/user/first-name/{first-name}:
+    get:
+      tags:
+      - admin
+      summary: get user by first name
+      parameters:
+      - name: first-name
+        in: path
+        description: 'first name of required user'
+        required: true
+        schema:
+          type: String
+      responses:
+        200:
+          description: Operation Succes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  
+  /admin/user/{user_id}/profile:
+    get:
+      tags:
+      - admin
+      summary: get user profile
+      parameters:
+      - name: user_id
+        in: path
+        description: 'user id'
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Operation Succes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+  /admin/user/{user_id}/contact:
+    get:
+      tags:
+      - admin
+      summary: get all contacts of current user
+      parameters:
+      - name: user_id
+        in: path
+        description: 'user id'
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Operation Succes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Contact'  
+
+  /admin/alert/{statement_id}/notify:
+    post:
+      tags:
+      - admin
+      summary: send a notification to all contacts
+      parameters:
+      - name: statement_id
+        in: path
+        description: 'id of covid positive statement'
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: Notification to be sended to covid contact cases
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Notification'
+          application/xml:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Notification'
+        required: true
+      responses:
+        200:
+          description: Operation Succes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Covid-Positive-Statement'  
+        
+components:
+  schemas:
+    Profile:
+      required:
+      - lastName
+      - email
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        lastName:
+          type: string
+        firstName:
+          type: string
+        email:
+          type: string
+        adress:
+          type: string
+        age:
+          type: integer
+          format: int32
+        covidStatus:
+          type: string
+          enum: 
+          - positive
+          - negative
+        contactNumber:
+          type: integer
+          format: int32
+      xml:
+        name: Profile
+    Contact:
+      required:
+      - date
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        date:
+          type: string
+          format: date-time
+        city:
+          type: string
+        masked:
+          type: boolean
+        user_id:
+          description: id of contact user
+          type: integer
+          format: int64
+      xml:
+        name: Contact
+    ContactByInfo:
+      required:
+      - date
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        date:
+          type: string
+          format: date-time
+        city:
+          type: string
+        masked:
+          type: boolean
+        user:
+          $ref: '#/components/schemas/User'
+    Covid-Positive-Statement:
+      required: 
+      - test-date
+      properties:
+        id:
+          type: integer
+          format: int64
+        test-date:
+          type: string
+          format: date
+        user_id: 
+          type: integer
+          format: int64
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        lastName:
+          type: string
+        firstName:
+          type: string
+        email:
+          type: string
+          format: email
+    Notification:
+      properties:
+        covid-positive-statement:
+          $ref: '#/components/schemas/Covid-Positive-Statement'
+        contact:
+          $ref: '#/components/schemas/Contact'
+              
+
+

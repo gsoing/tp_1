@@ -1,0 +1,376 @@
+openapi: 3.0.0
+info:
+  title: Stop COVID
+  description: 'Cette API permet de déclarer les rencontres et de les consulter afin
+    de détecter le plus rapidement les cas contacts COVID '
+  license:
+    name: MIT
+  version: 1.0.0
+servers:
+- url: https://touscovid/v1
+tags:
+- name: profil
+  description: Détail d'un utilisateur utilisant l'application STOP COVID
+- name: contact
+  description: Défini la liste des utilisateurs ayant eu un contact avec une personne
+- name: covid
+  description: Fonctionnalité permettant de se déclarer atteint du covid
+- name: notification
+  description: Fonctionnalité permettant d'envoyant une notification aux contacts d'un utilisateur atteint du covid
+paths:
+  /profil:
+    post:
+      tags:
+        - profil
+      summary: Créer un profil
+      operationId: createuser
+      requestBody:
+        description: Détail du profil que l'on va ajouter
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/profil'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/profil'
+        required: true
+      responses:
+        200:
+          description: Un nouveau profil a été créé
+        400:
+          description: La requête est invalide
+  '/profil/{userId}':
+    put:
+      tags:
+      - profil
+      summary: Modifier un profil
+      operationId: modifyProfile
+      parameters:
+      - name: userId
+        in: path
+        description: userId pour modifier un profil
+        required: true
+        schema:
+            type: integer
+      responses:
+        201:
+          description: La modification a bien été prise en compte
+        400:
+          description: La valeur de l'id n'est pas valide
+        403:
+          description: Les droits sont limités
+        404:
+          description: L'utilisateur n'a pas été trouvé
+    get:
+      tags:
+      - profil
+      summary: Consulter un profil
+      operationId: consultProfile
+      parameters:
+      - name: userId
+        in: path
+        description: userId de l'utilisateur dont on veut consulter
+        required: true
+        schema:
+            type: integer
+      responses:
+        200:
+          description: Renvoie le profil de la personne correspondante
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/profil'
+        400:
+          description: La valeur de l'id n'est pas valide
+  '/profil/{lastname}':
+    get:
+      tags:
+      - profil
+      summary: Retrouver l'id d'un utilisateur par son nom
+      operationId: findByLastname
+      parameters:
+      - name: lastname
+        in: path
+        description: nom de l'utilisateur dont on veut retrouver
+        required: true
+        schema:
+            type: string
+      responses:
+        200:
+          description: Renvoie l'id de la personne correspondante
+          content:
+            text/plain:
+              schema:
+                type: integer
+        400:
+          description: La valeur du nom n'est pas valide
+  '/profil/{mail}':
+    get:
+      tags:
+      - profil
+      summary: Retrouver l'id d'un utilisateur par son mail
+      operationId: findByMail
+      parameters:
+      - name: mail
+        in: path
+        description: mail de l'utilisateur dont on veut retrouver
+        required: true
+        schema:
+            type: string
+      responses:
+        200:
+          description: Renvoie l'id de la personne correspondante
+          content:
+            text/plain:
+              schema:
+                type: integer
+        400:
+          description: La valeur du mail n'est pas valide
+  '/contact/{userId}':
+    post:
+      tags:
+      - contact
+      summary : Déclarer un cas contact
+      operationId: declareContact
+      parameters:
+      - name: userId
+        in: path
+        description: userId auquel on veut déclarer un contact
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: Détail de la déclaration du cas contact
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/contact'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/contact'
+        required: true
+      responses:
+        200:
+          description: Le cas contact a bien été enregistré
+        400:
+          description: L'id de l'utlisateur n'est pas valide
+    get:
+      tags:
+        - contact
+      summary: Récupérer la liste des contacts d'un utilisateur
+      operationId: getContactList
+      parameters:
+      - name: userId
+        in: path
+        description: userId auquel on veut déclarer un contact
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Renvoie la liste des contacts de la personne correspondante
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/contact'
+        400:
+          description: L'id de l'utlisateur n'est pas valide
+    put:
+      tags:
+        - contact
+      summary: Modifier un contact existant
+      operationId: updateContact
+      parameters:
+        - in: path
+          name: userId
+          description: userId auquel on veut modifier un contact de sa liste
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Détail du contact à modifier
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/contact'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/contact'
+        required: true
+      responses:
+        '201':
+          description: La modification a bien été prise en compte
+        '400':
+          description: L'id de l'utilisateur n'est pas valide
+  '/contact/{userId}/{contactId}':
+    delete:
+      tags:
+        - contact
+      summary: Supprimer un contact de la liste de l'userId
+      operationId: deleteContact
+      parameters:
+        - name: userId
+          in: path
+          description: Id de l'utilisateur dont on va supprimer un contact
+          required: true
+          schema:
+            type: integer
+        - name: contactId
+          in: path
+          description: Id du contact à supprimer
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: La suppression a bien été prise en compte
+        '400':
+          description: L'id de l'utilisateur n'est pas valide
+  '/covid/{userId}':
+    post:
+      tags:
+        - covid
+      summary : Se déclarer malade du covid
+      operationId: declareCovid
+      parameters:
+      - name: userId
+        in: path
+        description: userId auquel on veut déclarer le covid
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: Détail de la déclaration COVID
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/covid'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/covid'
+        required: true
+      responses:
+        200:
+          description: La déclaration du covid a bien été enregistré
+        400:
+          description: L'id de l'utlisateur n'est pas valide
+  '/notification/{userId}':
+    post:
+      tags:
+        - notification
+      summary : Notifier les contacts de l'utilisateur
+      operationId: notifyContact
+      parameters:
+      - name: userId
+        in: path
+        description: userId auquel on veut récupérer la liste des contacts à notifier
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: Détail de la déclaration COVID
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/notification'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/notification'
+        required: true
+      responses:
+        200:
+          description: La déclaration du covid a bien été enregistré
+        400:
+          description: L'id de l'utlisateur n'est pas valide
+components:
+  schemas:
+    profil:
+      type: object
+      properties:
+        lastname:
+          type: string
+          example: Dupont
+        firstname:
+          type: string
+          example: Alice
+        age:
+          type: integer
+          format: int32
+          example: 32
+        address:
+          type: string
+          example: 10 rue de Paris, Créteil
+        email:
+          type: string
+          example: alice.dupont@email.com
+        covidStatus:
+          type: string
+        nbContacts:
+          type: integer
+          format: int32
+          example: 14
+      xml:
+        name: profil
+    contact:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+        date:
+          type: string
+          example: 31-11-2020
+        time:
+          type: string
+          example: 15h32
+        type:
+          type: string
+          description: enum type
+          enum:
+            - MASKED
+            - NOT_MASKED
+        idContact:
+          type: integer
+        userContact:
+          type: array
+          xml:
+            name: user
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/profil'
+      xml:
+        name: contact
+    covid:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        testDate:
+          type: string
+          example: 31-11-2020
+        idUser:
+          type: integer
+          format: int64
+      xml:
+        name: covid
+    notification:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        date:
+          type: string
+          example: 31-11-2020
+        idSickUser:
+          type: integer
+          format: int64
+      xml:
+        name: covid

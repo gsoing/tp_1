@@ -1,0 +1,509 @@
+openapi: 3.0.1
+info:
+  title: Stop COVID
+  description: 'Ma `super` API contre le COVID'
+  license:
+    name: MIT
+  version: 1.0.0
+servers:
+- url: http://petstore.swagger.io/v1
+tags:
+- name: user.declaration
+  description: declaration of a positif covid test
+- name: user.profile
+  description: manage current user informations  
+- name: user.contact
+  description: manage current user conctact
+- name: admin
+  description: administrator methods
+paths:
+  /user:
+    post:
+      tags:
+      - user.profile
+      summary: create profile
+      operationId: create-profile
+      requestBody:
+        description: Profil object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Profile'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Profile'
+        required: true
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        400:
+          description: Invalid input
+          content: {}
+  /user/{user_id}/profile:
+    get:
+      tags:
+      - user.profile
+      summary: get current profile information
+      operationId: gethisprofile
+      parameters:
+      - name: user_id
+        in: path
+        description: 'profile id got during authentification'
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        400:
+          description: Invalid input id or method not allowed with this permission
+          content: {}
+    put:
+      tags:
+      - user.profile
+      summary: update profile information
+      operationId: updateprofile
+      parameters:
+      - name: user_id
+        in: path
+        description: 'profile id got during authentification'
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: Profil object that needs to be update
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Profile'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Profile'
+        required: true
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+                
+  /user/{user_id}/contacts:
+    get:
+      tags:
+      - user.contact
+      summary: get all contacts of current account
+      parameters:
+      - name: user_id
+        in: path
+        description: 'profile id got during authentification'
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Contact'
+  /user/{user_id}/contact/person_id/{person_id}:
+    post:
+      tags:
+      - user.contact
+      summary: add a contact thanks to its id
+      parameters:
+      - name: user_id
+        in: path
+        description: 'profile id got during authentification'
+        required: true
+        schema:
+          type: integer
+      - name: person_id
+        in: path
+        description: 'profile id of the contact'
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: Contact to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Contact'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Contact'
+        required: true
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+  /user/{user_id}/contact/person_info:
+    post:
+      tags:
+      - user.contact
+      summary: add a contact thanks to its information (emails, first name, last name)
+      parameters:
+      - name: user_id
+        in: path
+        description: 'profile id got during authentification'
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: Contact to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactAlt'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/ContactAlt'
+        required: true
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+  /user/{user_id}/contact/{contact_id}:
+    get:
+      tags:
+      - user.contact
+      summary: get a contact
+      parameters:
+      - name: user_id
+        in: path
+        description: 'profile id got during authentification'
+        required: true
+        schema:
+          type: integer
+      - name: contact_id
+        in: path
+        description: 'contact id'
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+    put:
+      tags:
+      - user.contact
+      summary: update a contact
+      parameters:
+      - name: user_id
+        in: path
+        description: 'profile id got during authentification'
+        required: true
+        schema:
+          type: integer
+      - name: contact_id
+        in: path
+        description: 'contact id'
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: Contact to update
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Contact'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Contact'
+        required: true
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+    delete:
+      tags:
+      - user.contact
+      summary: delete a contact
+      parameters:
+      - name: user_id
+        in: path
+        description: 'profile id got during authentification'
+        required: true
+        schema:
+          type: integer
+      - name: contact_id
+        in: path
+        description: 'contact id'
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: successfully deleted
+          
+  /user/{user_id}/covid:
+    post:
+      tags:
+      - user.declaration
+      summary: add a covid declaration
+      parameters:
+      - name: user_id
+        in: path
+        description: 'profile id got during authentification '
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: Declaration to add (id empty here)
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Covid-Declaration'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Covid-Declaration'
+        required: true
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Covid-Declaration'
+  
+  /admin/user/search:
+    get:
+      tags:
+      - admin
+      summary: get all contacts of current account
+      parameters:
+      - name: lastname
+        in: query
+        description: 'last name of the searched user'
+        required: false
+        schema:
+          type: string
+      - name: firstname
+        in: query
+        description: 'first name of the searched user'
+        required: false
+        schema:
+          type: string
+      - name: email
+        in: query
+        description: 'email of the searched user'
+        required: false
+        schema:
+          type: string
+          
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  
+  
+  /admin/user/{user_id}/profile:
+    get:
+      tags:
+      - admin
+      summary: get a profil
+      parameters:
+      - name: user_id
+        in: path
+        description: 'profile id is the same as user id'
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+  /admin/user/{user_id}/contact:
+    get:
+      tags:
+      - admin
+      summary: get all contacts of a user
+      parameters:
+      - name: user_id
+        in: path
+        description: 'profile id is the same as user id'
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Contact'  
+
+  /admin/declaration/{declaration_id}/notify:
+    post:
+      tags:
+      - admin
+      summary: send a notification to all contacts
+      parameters:
+      - name: declaration_id
+        in: path
+        description: 'id of the covid declaration'
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: Notification witch always the same declaration with different contacts
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Notification'
+          application/xml:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Notification'
+        required: true
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Covid-Declaration'  
+        
+components:
+  schemas:
+    Profile:
+      required:
+      - lastName
+      - email
+      type: object
+      properties:
+        user_id:
+          type: integer
+          format: int64
+        lastName:
+          type: string
+        firstName:
+          type: string
+        email:
+          type: string
+        adresse:
+          type: string
+        age:
+          type: integer
+          format: int32
+        covidStatus:
+          type: string
+          enum: 
+          - corroned
+          - clean
+        contactNumber:
+          type: integer
+          format: int32
+      xml:
+        name: Profile
+    Contact:
+      required:
+      - date
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        date:
+          type: string
+          format: date-time
+        city:
+          type: string
+        masked:
+          type: boolean
+        user_id:
+          description: id of the user in contact
+          type: integer
+          format: int64
+      xml:
+        name: Contact
+    ContactAlt:
+      required:
+      - date
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        date:
+          type: string
+          format: date-time
+        city:
+          type: string
+        masked:
+          type: boolean
+        user:
+          $ref: '#/components/schemas/User'
+    Covid-Declaration:
+      required: 
+      - date-test
+      properties:
+        id:
+          type: integer
+          format: int64
+        date-test:
+          type: string
+          format: date
+        user_id: 
+          type: integer
+          format: int64
+    User:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          format: int64
+        lastName:
+          type: string
+        firstName:
+          type: string
+        email:
+          type: string
+          format: email
+    Notification:
+      properties:
+        covid_declaration:
+          $ref: '#/components/schemas/Covid-Declaration'
+        contact:
+          $ref: '#/components/schemas/Contact'
+              
+
+

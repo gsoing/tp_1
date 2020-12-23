@@ -1,0 +1,423 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Stop COVID
+  description: Ma super API contre le COVID
+  contact:
+    email: pierre.jacquet@etu.u-pec.fr
+  license:
+    name: MIT
+servers:
+  - url: http://apicovid.gouv.fr/v1 # Versioning the API to facilitate the retrocompatibility
+tags:
+- name: "Users"
+  description: "API intended for application users"
+- name: "Admins"
+  description: "API intended for application administrators"
+paths:
+  /users:
+    post:
+      description: "Add an UserWithoutId DTO and return an UserWithId DTO to specify the Id generated"
+      tags:
+      - "Users"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserWithId'
+      responses:
+        '201':
+          description: "User was created - The created object is returned to inform the caller of the generated ID"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserWithId'
+        '400':
+          description: "Invalid information specified"
+    put:
+      description: "Modify an UserWithId DTO (the user id must be specified to perform the operation and can not be changed)"
+      tags:
+      - "Users"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserWithId'
+      responses:
+        '200':
+          description: "The user was succesfully modified"
+        '400':
+          description: "Invalid information specified"
+        '404':
+          description: "No user associated to the specified ID was found (please not that userid can't be changed)"
+  /users/findByEmail:
+    get:
+      tags:
+      - "Users"
+      - "Admins"
+      description: "Returns a UserMinimal DTO (which contains the name, firstname and mail fields) based on the email provided. The email is considered to be a unique key, so a unique UserMinimal object is returned"
+      parameters:
+        - in: query
+          name: email
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserMinimal'
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "User not found"  
+  /users/findByName:
+    get:
+      tags:
+      - "Users"
+      - "Admins"
+      description: "Return a UserMinimal DTO list (because of namesake) based on the name provided. The MinimalUser object contains the following fields : name, firstname and email"
+      parameters:
+        - in: query
+          name: name
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: offset
+          schema:
+            type: integer
+          description: "The number of User to skip before starting to collect the result set, used for pagination purpose"
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+          description: "The numbers of Users to return (min 1, max 20, default 10)"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfUserMinimal'
+        "400":
+          description: "Invalid name supplied (no special character allowed)"
+        "404":
+          description: "User(s) not found"
+  /users/{userid}:
+    get:
+      tags:
+      - "Users"
+      - "Admins"
+      description: "Returns the informations related to a specific user based on the provided userid, the method can be used to retrieve our own profile (before editing it) or for administration purpose. The returned fields include all the ones contained on a UserWithId DTO with also the numberOfContacts registered and the last covid declaration (which can be null, meaning no declaration was made) "
+      parameters:
+        - in: path
+          name: userid
+          schema:
+            type: string
+          required: true
+          description: "Userid"
+      responses:
+        "200":
+          description: "Return the attribute contains in the User profile, the last declaration attached to the profile (which can be null) and the number of contacts registered. On the backend, User DTO and Contact List DTO are attached, but for API needs (not all methods needs both), they are decomposed on two distincts objects which are here concatenate"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CovidDeclaration'
+                  - $ref: '#/components/schemas/UserWithId'
+                  - type: object
+                    required:
+                      - numberOfContacts
+                    properties:
+                      numberOfContacts:
+                        type: integer
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "User not found"
+  /users/{userid}/contacts/:
+    get:
+      tags:
+      - "Users"
+      - "Admins"
+      description: "Returns the contact list of the specified userid. The contact list is composed of a ContactWithId DTO. A contact list is always attached to a specific user. However, it is not declared as an attribute of the User DTO because not all methods related to user needs it."
+      parameters:
+        - in: path
+          name: userid
+          schema:
+            type: string
+          required: true
+          description: "Userid"
+        - in: query
+          name: offset
+          schema:
+            type: integer
+          description: "The number of Contact to skip before starting to collect the result set, used for pagination purpose"
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+          description: "The numbers of Contact to return (min 1, max 20, default 10)"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfContactWithId'
+        "400":
+          description: "Invalid userid supplied"
+        "404":
+          description: "User not found"
+    post:
+      description: "Add a new contact declaration. The attribute user of the ContactWithoutId DTO can EITHER be the id of an existing user of the application OR a brief description of user (using UnidentifiedUser object which required name,firstname and email). UserType property is used to differentiate the two case based on the discriminator mechanism (value : identified or unidentified). We return a ContactWithId object to notify the caller of the generated id for the declared contact"
+      tags:
+      - "Users"
+      parameters:
+        - in: path
+          name: userid
+          schema:
+            type: string
+          required: true
+          description: "Userid"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactWithoutId'
+      responses:
+        '201':
+          description: "The contact was created - The created object is returned to inform the caller of the generated ID"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactWithId'
+        '400':
+          description: "Missing some contact information"
+    put:
+      description: "Modify an existing contact declaration (the contact id can not be changed). The method is based on ContactWithId DTO"
+      tags:
+      - "Users"
+      parameters:
+        - in: path
+          name: userid
+          schema:
+            type: string
+          required: true
+          description: "Userid"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactWithId'
+      responses:
+        '200':
+          description: "The contact was succesfuly modified"
+        '404':
+          description: "User or contact not found (please not that contactId can't be modified)"
+  /users/{userid}/contacts/{contactid}:
+    delete:
+      description: "Delete an existing contact declaration. The requested path parameters are the one required : a userid (because all the contact lists are attached to a specific user) and the contactid to delete"
+      tags:
+      - "Users"
+      parameters:
+        - in: path
+          name: userid
+          schema:
+            type: string
+          required: true
+          description: "Userid"
+        - in: path
+          name: contactid
+          schema:
+            type: string
+          required: true
+          description: "Contactid"
+      responses:
+        '200':
+          description: "The contact was succesfully deleted"
+        '400':
+          description: "Invalid userid or contactid"
+        '404':
+          description: "User or contact not found"
+  /users/{userid}/declaration/:
+    post:
+      description: "Add a covid declaration to the specified User. In the unlikely event of an already existing declaration, the new one will replace it. The declaration should lead to the notification of all its contact list by an administrator (on this exercice, even if it should be automatic in the real world). CovidStatus attribute is required because administrator needs to know the current status of the user, however, the declaration attribute can be null if the user didn't create any, which mean the user is not sick"
+      tags:
+      - "Users"
+      parameters:
+        - in: path
+          name: userid
+          schema:
+            type: string
+          required: true
+          description: "Userid"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CovidDeclaration'
+      responses:
+        '201':
+          description: "The declaration was created - nothing is returned"
+        '400':
+          description: "Missing declaration information or wrong format"
+        '404':
+          description: "User not found"
+    put:
+      description: "Permit the change of covidStatus parameter of the latest Covid declaration of the user, he can notify the application he is now cured. This option is just used for statistic purpose regarding the administration panel, its contact list must be notified anyway."
+      tags:
+      - "Users"
+      parameters:
+        - in: path
+          name: userid
+          schema:
+            type: string
+          required: true
+          description: "Userid"
+        - in: query
+          name: covidStatus
+          schema:
+            type: boolean
+          required: true
+          description: "Update the covidStatus of the latest declaration"
+      responses:
+        '200':
+          description: "The status was succesfully updated"
+        '400':
+          description: "Missing information or wrong format"
+        '404':
+          description: "User not found or no previous declaration"
+  /users/{userid}/alert:
+     post:
+      description: "Alert the contact list of the specified user. The alert doesn't need any other parameter because the contact list already contains the list of users to prevent with the required information (stored only here) : the contact date and the location. All the user registered on the contact list will receive a notification which will contain the name of the covid positive user and the date of their last contact"
+      tags:
+      - "Admins"
+      parameters:
+        - in: path
+          name: userid
+          schema:
+            type: string
+          required: true
+          description: "Userid"
+      responses:
+        '201':
+          description: "The alert was created - nothing is returned"
+        '400':
+          description: "Missing declaration information or wrong format"
+        '404':
+          description: "User not found"
+components:
+  schemas:
+    UserMinimal:
+      description: "Minimal user returned by search functions"
+      type: object
+      properties:
+        name:
+          type: string
+        firstname:
+          type: string
+        email:
+          type: string
+      required:
+        - name
+        - firstname
+        - email
+    UserWithoutId:
+      description: "User without id, used for creation, extends UserMinimal"
+      allOf:
+        - type: object
+          required:
+          - age
+          - address
+          properties:
+            age:
+              type: integer
+            address:
+              type: string
+        - $ref: '#/components/schemas/UserMinimal'
+    UserWithId:
+      description: "User with the id specified, generally used, extends UserWithoutId"
+      allOf:
+        - type: object
+          required:
+          - userid
+          properties:
+            userid:
+              type: string
+        - $ref: '#/components/schemas/UserWithoutId'
+    UserUnidentified:
+      description: "User unidentified, used for Contact declaration, extends UserMinimal"
+      allOf:
+        - $ref: '#/components/schemas/UserMinimal'
+    ArrayOfUserMinimal:
+      description: "Array of UserMinimal DTO, use for user research fonctions"
+      type: array
+      items:
+        $ref: '#/components/schemas/UserMinimal'
+    ContactWithoutId:
+      description: "Contact without id specified, used for creation. userType is used to specify the type of user (must be identified or unidentified) : "
+      type: object
+      properties:
+        date:
+          type: string
+          format: date-time
+        location:
+          type: string
+        withMask:
+          type: boolean
+        userType:
+          type: string
+          enum: [unidentified, identified]
+        user:
+          oneOf:
+            - $ref: '#/components/schemas/UserUnidentified'
+            - type: object # type identified which mean we just have a string containing the user idd
+              required:
+                - UserIdentified
+              properties:
+                UserIdentified:
+                  type: string
+          discriminator:
+            propertyName: userType  # usertype properties specify what type of user is it : identified or unidentified
+            mapping:
+              unidentified: UserUnidentified
+              identified: UserIdentified
+      required:
+        - date
+        - location
+        - withMask
+        - userType
+        - user
+    ContactWithId:
+      description: "Contact with the id specified, generally used, extends ContactWithoutId"
+      allOf:
+        - type: object
+          required:
+          - contactId
+          properties:
+            contactId:
+              type: string
+        - $ref: '#/components/schemas/ContactWithoutId'
+    ArrayOfContactWithId:
+      description: "Array containing ContactWithId object, used to retrieve the contact list of a specific user"
+      type: array
+      items:
+        $ref: '#/components/schemas/ContactWithId'
+    CovidDeclaration:
+      description: "A covid declaration contains the date of the positive test. A new declaration will notify all its contact list. In the unlikely case of second covid declaration, it will replace the first one"
+      type: object
+      properties:
+        dateTest:
+          type: string
+          format: date-time
+        covidStatus:
+          type: boolean
+ 

@@ -1,0 +1,361 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Stop COVID
+  description: Ma super API contre le COVID
+  license:
+    name: MIT
+servers:
+  - url: http://stopcovid.swagger.io/v1
+tags: 
+- name: "Users"
+  description: "API declared for the appliction users"
+- name: "Admins"
+  description: "API declared for the application administrators"
+paths:
+  /user:
+    post:
+      summary: Create user's profil
+      description: The user must be abble to create a profil
+      tags:   
+      - "Users"
+      requestBody:
+        content:
+          application/json:
+            schema:      # Request body contents
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: OK
+        "400":
+          description: "Invalid BODY supplied"
+        "404":
+          description: "Order not found"
+    put:
+      summary: Update user profil
+      description: The user must be abble to update his profil
+      tags:
+      - "Users"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: OK
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Order not found"
+    get:
+      summary: Find user profil by id for the role Admin
+      description: The Admin get the informations of the user
+      tags:
+      - "Admins"
+      parameters:
+      - in: query
+        name: userId
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the user to get
+      responses:
+        '200':
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/User'
+                  - $ref: '#/components/schemas/CovidDeclaration'
+                  - type: object
+                    required: 
+                      - numberContact
+                    properties: 
+                      numberContact:
+                        type: integer
+                      
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Order not found"
+  
+  /user/{userId}:
+    get:
+      summary: Find user profil by ID
+      description: In order to update his profil, the user must get the informations of his profil
+      tags:
+      - "Users"
+      parameters:
+      - in: path
+        name: userId
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the user to get
+      responses:
+        '200':
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Order not found"
+  /user/findByEmail/{userEmail}:
+    get:
+      summary: "Find user by email"
+      description: "For each call, the request response is unique"
+      tags:
+      - "Users"
+      - "Admins"
+      parameters:
+      - in: path
+        name: "userEmail"
+        description: "Email of user that return a unique profil"
+        required: true
+        schema:
+          type: string
+      responses:
+        "201":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Order not found"
+  /user/findByName/{userName} :
+    get:
+      summary: "Find user by name"
+      description: "get the list of user by their names."
+      tags:
+      - "Users"
+      - "Admins"
+      parameters:
+      - in: path
+        name: "userName"
+        description: "Name of user that needs to be fetched"
+        required: true
+        schema: 
+          type: string
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Userlist'
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Order not found"
+  /user/contact : 
+    post:
+      summary: Create contact
+      description: The user create a contact
+      tags:   
+      - "Users"
+      requestBody:
+        content:
+          application/json:
+            schema:      # Request body contents
+              $ref: '#/components/schemas/Contact'
+      responses:
+        '201':
+          description: OK
+        "400":
+          description: "Invalid BODY supplied"
+        "404":
+          description: "Order not found"
+    put:
+      summary: Update contact
+      description: The user must be abble to update a declared contact
+      tags:
+      - "Users"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Contact'
+      responses:
+        '200':
+          description: OK
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Order not found"
+  /user/{userId}/contacts : 
+    get:
+      summary: "Get list of contacts declared by a user"
+      description: "We set the id of the user, and get all the contact he declared"
+      tags:
+      - "Users"
+      - "Admins"
+      parameters:
+      - in: path
+        name: "userId"
+        description: "Contacts declared by user (userId) that need to be fetched"
+        required: true
+        schema: 
+          type: integer
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contactlist'
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Order not found" 
+  /user/contact/{idContact} :
+    delete:
+      tags:
+      - "Users"
+      summary: "Deletes a contact"
+      description: "delete a contact by id"
+      parameters:
+      - in: path
+        name: "idContact"
+        description: "Pet id to delete"
+        required: true
+        schema: 
+          type: string
+      responses:
+        '204':
+          description: "No content"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Contact not found"
+  /user/covid : 
+    post:
+      summary: Create a covid declaration
+      description: The user declare himself sick with the date of its test. For doing it, we pass the id of the user in the request body . 
+      tags:   
+      - "Users"
+      requestBody:
+        content:
+          application/json:
+            schema:      # Request body contents
+              $ref: '#/components/schemas/CovidDeclaration'
+      responses:
+        '201':
+          description: OK
+        "400":
+          description: "Invalid BODY supplied"
+        "404":
+          description: "Order not found"
+  /user/alert:
+    post:
+      summary: Notify a list of user
+      description: The administrator send a notification to all the contactList he get.We    got then a list of users that had been in contact with a user. 
+      tags:
+      - "Admins"
+      requestBody:
+        content:
+          application/json:
+            schema:      # Request body contents
+              allOf:
+                - $ref: '#/components/schemas/Notification'
+      responses:
+        '201':
+          description: OK
+        "400":
+          description: "Invalid BODY supplied"
+        "404":
+          description: "Order not found" 
+      
+  
+components:
+  schemas:
+    User:   
+      type: object
+      properties:
+        userId:
+          type: integer
+        name:
+          type: string
+        firstname:
+          type: string
+        age:
+          type: integer
+        address:
+          type: string
+        email:
+          type: string
+      required: 
+        - name
+        - email
+    Contact:
+      type: object
+      properties:
+        idContact: 
+          type: string
+        dateTime:
+          type: string
+          description: date-time
+          format: string
+          pattern: "YYYY-MM-DD:HHhmm"
+        place:
+          type: string
+        mask:
+          type: string
+          enum: [WITH, WITHOUT]
+        user:
+          oneOf:
+            - $ref: '#/components/schemas/User'
+            - $ref: '#/components/schemas/UserContact'
+      required: 
+        - dateTime
+        - place
+        - mask
+        - user
+    UserContact: 
+      type: object
+      properties:
+        name: 
+          type: string
+        surname: 
+          type: string
+        email: 
+          type: string
+    CovidDeclaration:
+      type: object
+      properties:
+        userId:
+          type: string
+        testDate : 
+          type: string
+          description: date-time
+          format: string
+          pattern: "YYYY-MM-DD"
+    Notification:
+      description: "The Notification contain a list of user that must be notified, with the user ID of the sich person and the date of contamination."
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/Userlist'
+        userId:
+          type: string
+        contaminationDate : 
+          type: string
+          description: date-time
+          format: string
+          pattern: "YYYY-MM-DD"
+    Userlist:
+      type: array
+      items:
+        $ref: '#/components/schemas/User'
+    Contactlist:
+      type: array
+      items: 
+        $ref: '#/components/schemas/Contact'
+    

@@ -1,0 +1,478 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Stop COVID
+  description: Ma super API contre le COVID
+  license:
+    name: MIT
+servers:
+  - url: http://localhost:8080/
+paths:
+  /user:
+    post:
+      summary: Créer le profil d'un utilisateur
+      tags:
+        - Gestion du Profil
+      requestBody:
+        content: 
+          application/json:
+              schema:
+                $ref: "#/components/schemas/profil"
+      responses:
+        '201':
+          description: The profil created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/profil"
+        '400':
+          description: Bad request. User firstname and email must be a string and completed.
+        '401':
+          description: Authorization information is missing or invalid.  
+        '500':
+          description: The server is unavailable at the moment. Please try again later.
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDefinition"
+    get:
+      summary: Lister les utilisateurs
+      description: retounre une liste de tous les utilisateurs présents dans le système
+      tags:
+        - Gestion du Profil
+      parameters:
+        - name: page
+          schema: 
+            type: integer
+          in: query
+          description: numéro de la page à retourner
+        - name: pageSize
+          schema: 
+            type: integer
+          in: query
+          description: nombre de documents par page
+      responses:
+        '200':
+          description: une page de résultat
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/userList"
+        '400':
+          description: Bad request. page and pageSize must be an integer and larger than 0.
+        '401':
+          description: Authorization information is missing or invalid.
+        '500':
+          description: The server is unavailable at the moment. Please try again later.
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDefinition"
+  /user/{userId}:
+    parameters:
+      - $ref: "#/components/parameters/userId"
+    put:
+      summary: Mettre à jour le profil d'un utilisateur
+      tags:
+        - Gestion du Profil
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/profil"
+      responses:
+        '200':
+          description: le document mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/profil"
+        '400':
+          description: Bad Request information is missing or invalid.
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: The user with the specified ID was not found.
+        '500':
+          description: The server is unavailable at the moment. Please try again later.
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDefinition" 
+    get:
+      summary: Recherche d'un utilisateur par son id 
+      description: retourne un utilisateur en fonction de son id
+      tags:
+        - Gestion du Profil
+      responses:
+        '200':
+          description: une page de résultat
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/user"
+        '400':
+          description: Bad Request information is missing or invalid.
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: The user with the specified ID was not found.
+        '500':
+          description: The server is unavailable at the moment. Please try again later.
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDefinition"
+                
+  /user/{userId}/covidDeclaration:
+    parameters:
+      - $ref: "#/components/parameters/userId"
+    post:
+      summary: Déclaration covid par un utilisateur
+      tags:
+        - Gestion du Profil
+      requestBody:
+        content: 
+          application/json:
+              schema:
+                $ref: "#/components/schemas/covidDeclaration"
+      responses:
+        '201':
+          description: The declaration created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/covidDeclaration"
+        '400':
+          description: Bad Request information is missing or invalid.
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: The user with the specified ID was not found.
+        '500':
+          description: The server is unavailable at the moment. Please try again later.
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDefinition"
+  /contact:
+    post:
+      summary: Créer un cas contact
+      tags:
+        - Gestion des contacts
+      requestBody:
+        content: 
+          application/json:
+              schema:
+                $ref: "#/components/schemas/contact"
+      responses:
+        '201':
+          description: The contact created or updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/contact"
+        '400':
+          description: Bad Request. Information is missing or invalid.
+        '401':
+          description: Authorization information is missing or invalid.
+        '500':
+          description: The server is unavailable at the moment. Please try again later.
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDefinition"
+    
+  /contact/{contactId}:
+    parameters:
+      - $ref: "#/components/parameters/contactId"
+    put:
+      summary: Mettre à jour le contact d'un utilisateur
+      tags:
+        - Gestion des contacts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/contact"
+      responses:
+        "200":
+          description: le contact à été mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/contact"
+        '400':
+          description: Bad Request. Information is missing or invalid.
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: The contact with the specified ID was not found.
+        '500':
+          description: The server is unavailable at the moment. Please try again later.
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDefinition"
+    delete:
+      summary: Supprimer un cas contact d'un utilisateur
+      tags: 
+        - Gestion des contacts
+      description: supprime le contact de l'utilisateur
+      responses:
+        "204":
+          description: le contact a été supprimé
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: The contact with the specified ID was not found.
+        '500':
+          description: The server is unavailable at the moment. Please try again later.
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDefinition" 
+  /contact/{userId}:
+    parameters:
+      - $ref: "#/components/parameters/userId"
+    get:
+      summary: Lister tous les cas contacts d'un utilisateur
+      description: retounre une liste de tous les cas contact d'un utilisateur
+      tags:
+        - Gestion des contacts
+      parameters:
+        - name: page
+          schema: 
+            type: integer
+          in: query
+          description: numéro de la page à retourner
+        - name: pageSize
+          schema: 
+            type: integer
+          in: query
+          description: nombre de contact par page
+      responses:
+        '200':
+          description: une page de résultat
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/contactList"
+        '400':
+          description: Bad request. page and pageSize must be an integer and larger than 0.
+        '401':
+          description: Authorization information is missing or invalid.
+        '404':
+          description: The user with the specified ID was not found.
+        '500':
+          description: The server is unavailable at the moment. Please try again later.
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDefinition"
+                
+  /contact/{userId}/notifyContactCase:
+    parameters:
+      - $ref: "#/components/parameters/userId"
+    post:
+      summary: Notification cas covid avec un utilisateur
+      tags:
+        - Gestion des contacts
+      requestBody:
+        content: 
+          application/json:
+              schema:
+                $ref: "#/components/schemas/notification"
+      responses:
+        '201':
+          description: The declaration created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/notification"
+        '404':
+          description: The user with the specified ID was not found.
+        '401':
+          description: Authorization information is missing or invalid.
+        '500':
+          description: The server is unavailable at the moment. Please try again later.
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDefinition"
+components:
+  parameters:
+    contactId:
+      name: contactId
+      in: path
+      required: true
+      description: identifiant de l'utilisateur à récupérer
+      schema:
+        type: string
+    userId:
+      name: userId
+      in: path
+      required: true
+      description: identifiant du user à récupérer
+      schema:
+        type: string
+  schemas:
+    pageData:
+      description: objet générique pour les résultats de recherche
+      type: object
+      properties:
+        page: 
+          type: integer
+          description: le numéro de la page courante
+        nbElements:
+          description: le nombre total d'element
+          type: integer
+    userSummary:
+      description: Informations bref d'un utilisateur
+      type: object
+      properties:
+        firstname:
+          type: string
+          description: nom 
+        lastname:
+          type: string
+          description: prenom
+        email:
+          type: string
+          description: email
+      required:
+        - firstname
+        - email
+    profil:
+      description: Informations sur le profil d'un utilisateur
+      allOf: 
+        - $ref: "#/components/schemas/userSummary"
+      properties:
+        age:
+          type: string
+          description: age de l'utilisateur
+        adresse:
+          type: string
+          description: adresse de l'utilisateur
+    user:
+      description: Informations complètes d'un utilisateur
+      allOf: 
+        - $ref: "#/components/schemas/profil"
+      properties:
+        userId:
+          type: string
+          description: identifiant de l'utilisateur
+        covidStatus:
+          type: string
+          description: statut covid de l'utilisateur
+          enum:
+            - SICK
+            - NOT SICK
+        contactnumber:
+          type: string
+          description: nombre des cas contacts
+    userList:
+      description: Liste des résultats d'une recherche d\'utilisateurs
+      allOf: 
+        - $ref: '#/components/schemas/pageData'
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/userSummary"
+    contact:
+      description: Informations sur un cas contact
+      allOf: 
+        - $ref: "#/components/schemas/userSummary" 
+      properties:
+        userId:
+          type: string
+          description: identifiant de l'utilisateur qui déclare le cas contact
+        contactdateHour: 
+          type: string
+          format: date-time
+          description: Date et heure du contact
+        contactPlace:
+          type: string
+          description: Lieu du contact
+        contactType:
+          type: string
+          description: Type du contact
+          enum:
+            - AVEC MASQUE
+            - SANS MASQUE
+        contactId:
+          type: string
+          description: identifiant du cas contact (userID)
+    contactList:
+      description: la liste des résultats d'une recherche de contacts
+      allOf: 
+        - $ref: '#/components/schemas/pageData'
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/contact"
+    covidDeclaration:
+      description: Informations sur la déclaration cas covid par un utilisateur
+      type: object
+      properties:
+        userID:
+          type: string
+          description: Identifiant utilisateur du malade
+        dateTest:
+          type: string
+          format: date-time
+          description: date du test
+    notification:
+      description: Information sur la notification des cas contact en cas de cas covid 
+      type: object
+      properties:
+        userID:
+          type: string
+          description: identifiant du user malade 
+        contactDate: 
+          type: string
+          format: date-time
+          description: la date du contact
+    errorDefinition:
+      description: la description de l'erreur
+      type: object
+      properties:
+        errorType: 
+          type: string
+          description: le type d'erreur
+          enum:
+            - TECHNICAL
+            - FUNCTIONAL
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              errorCode: 
+                type: string
+                description: le code de l'erreur
+              errorMessage:
+                type: string
+                description: message d'erreur

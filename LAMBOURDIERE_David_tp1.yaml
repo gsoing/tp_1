@@ -1,0 +1,375 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Stop COVID
+  description: Ma super API contre le COVID
+  license:
+    name: MIT
+servers:
+  - url: 'http://petstore.swagger.io/v1'
+tags:
+- name: "Profil"
+  description: ""
+- name: "Contact"
+  description: ""
+- name: "Déclaration"
+  description: ""
+- name: "Alerte"
+  description: ""
+paths:
+
+  /profiles:
+    summary: Gestion du profil
+    get:
+      tags:
+      - "Profil"
+      summary: "Cherche un profil avec le nom ou l'adresse mail "
+      description: |
+        Un utilisateur ou un administrateur eut effectuer une recherche parmi les
+        utilistateur par Nom ou Email.
+      parameters:
+      - in: query
+        name: "by"
+        required: true
+        description: "L'axe de recherche, on peut chercher par nom ou par email"
+        schema:
+          type: string
+          enum:
+            - name
+            - email
+      - in: query
+        name: "query"
+        required: true
+        description: "Le motif recherché : un nom ou un email"
+        schema:
+          type: string
+          example: "Jean Dupont or jeandupont@mail.fr"
+      responses:
+        200:
+          description: "*ProfileSearchResult* objects array"
+          content: 
+            application/json:
+              schema: 
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProfileSearchResult"
+        400:
+          description: "Bad request"
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+    post:
+      tags:
+      - "Profil"
+      summary: "Crée un nouveau profil"
+      description: |
+        Un utilisateur peut créer son profil
+      requestBody:
+        description: "L'objet *Profile* que l'on veut ajouter"
+        required: true
+        content: 
+          application/json:
+            schema: 
+              $ref: "#/components/schemas/ProfileUserDTO"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ApiResponse"
+    put:
+      summary: "Crée ou modifie un profil existant"
+      description: |
+        Un utilisateur peut modifier son profil
+      tags:
+      - "Profil"
+      requestBody:
+        description: "L'objet *Profile* que l'on veut modifier"
+        required: true
+        content: 
+          application/json:
+            schema: 
+              $ref: "#/components/schemas/ProfileUserDTO"
+      responses:
+        201:
+          description: Created
+        400:
+          description: "Bad request"
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ApiResponse"  
+  /profiles/{userId}:
+    get:
+      tags:
+      - "Profil"
+      summary: "Récupère le profil d'un utilisateur"
+      description: |
+        Un administrateur peut consulter le profil d'un utilisateur
+        en renseignant l'id de ce dernier.
+      parameters:
+      - in: path
+        name: "userId"
+        required: true
+        description: "Identifiant de l'utilisateur"
+        schema:
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: "*ProfileAdminDTO* object"
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ProfileAdminDTO"
+        400:
+          description: "Bad request"
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ApiResponse"
+
+  /contacts/{userId}:
+    get:
+      tags:
+      - "Contact"
+      summary: "Récupère les contacts déclarés par un utilisateur"
+      description: |
+        Un administrateur peut afficher la liste des contacts d'un utilisateur
+        en renseignant l'id de ce dernier.
+      parameters:
+      - in: path
+        name: "userId"
+        required: true
+        description: "Identifiant de l'utilisateur"
+        schema:
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: "*Contact* objects array"
+          content: 
+            application/json:
+              schema: 
+                type: array
+                items:
+                  $ref: "#/components/schemas/Contact"
+        400:
+          description: "Bad request"
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /contacts:
+    post:
+      summary: "Crée un nouveau contact avec l'utilisateur connecté"
+      description: |
+        Un utilisateur peut déclarer un contact avec une personne. Il doit renseigner
+        l'id de la personne ou les informations nom, prénom, email.
+      tags:
+      - "Contact"
+      requestBody:
+        description: ""
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Contact"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /declaration:
+    post:
+      tags:
+      - "Déclaration"
+      summary: "Crée une nouvelle déclaration covid pour l'utilisateur connecté"
+      description: | 
+        Un utilisateur peut se déclarer malade du COVID.
+        Cette déclaration doit contenir la date du test.
+      requestBody:
+        description: "L'objet *Declaration* que l'on veut ajouter"
+        required: true
+        content: 
+          application/json:
+            schema: 
+              $ref: "#/components/schemas/Declaration"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ApiResponse"
+  /alert:
+    post:
+      tags:
+      - "Alerte"
+      summary: "Crée une nouvelle alerte "
+      description: |
+        Un administrateur peut notifier une liste d'utilisateur qu'ils sont cas
+        contacts. Cette notification doit contenir l'identifiant du malade ainsi
+        que la date du contact.
+      requestBody:
+        description: "L'objet *Alert* que l'on veut envoyer"
+        required: true
+        content: 
+          application/json:
+            schema: 
+              $ref: "#/components/schemas/Alert"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ApiResponse"
+    
+components:
+  schemas:
+    ProfileUserDTO:
+      type: object
+      required:
+        - email
+        - lastname
+      properties:
+        lastname:
+          type: string
+          example: "Dupont"
+        firstname:
+          type: string
+          example: "Jean"
+        age:
+          type: integer
+          format: int32
+          example: 51
+        adress:
+          type: string
+          example: "71 Rue Saint-Simon, 94000 Créteil"
+        email:
+          type: string
+          format: email
+          example: "jeandupont@mail.fr"
+    ProfileAdminDTO:
+      type: object
+      required:
+        - email
+        - lastname
+      properties:
+        lastname:
+          type: string
+          example: "Dupont"
+        firstname:
+          type: string
+          example: "Jean"
+        age:
+          type: integer
+          format: int32
+          example: 51
+        adress:
+          type: string
+          example: "71 Rue Saint-Simon, 94000 Créteil"
+        email:
+          type: string
+          format: email
+          example: "jeandupont@mail.fr"
+        covid:
+          type: boolean
+          description: "Indique si la personne a la covid ou non"
+          example: true
+        nContact:
+          type: integer
+          format: int32
+          example: 12
+    ProfileSearchResult:
+      type: object
+      properties:
+        lastname:
+          type: string
+          example: "Dupont"
+        firstname:
+          type: string
+          example: "Jean"
+        email:
+          type: string
+          format: email
+          example: "jeandupont@mail.fr"
+    Contact:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date-time
+        location:
+          type: string 
+          example: "Travail"
+        maskOn:
+          type: boolean
+          example: false
+        with:
+          oneOf:
+          - type: integer
+            format: int32
+            description: "Identifiant du contact"
+          - type: object
+            description: "Informations sur la personne contact"
+            properties:
+              lastname:
+                type: string
+              firstname:
+                type: string
+              email:
+                type: string
+                format: email
+          example: 
+            lastname: "Marie"
+            firstname: "Michelle"
+            email: "mariemichelle@mail.fr"
+    Declaration:
+      type: object
+      required:
+        - date
+      properties:
+        date:
+          type: string
+          format: date
+    Alert:
+      type: object
+      properties:
+        sickUserId:
+          type: integer
+          format: int32
+        contactDate:
+          type: string
+          format: date
+    ApiResponse:
+        type: object
+        properties:
+          code:
+            type: integer
+            format: int32
+          trace-id:
+            type: string
+          message:
+            type: string
+            example: "intelligible message"
+            
+          
+            
+        
+
+        
+      

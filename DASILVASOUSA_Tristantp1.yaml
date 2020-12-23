@@ -1,0 +1,520 @@
+openapi: 3.0.1
+info:
+  title: Stop COVID
+  description: Ma super API contre le COVID
+  license:
+    name: MIT
+  version: 1.0.0
+servers:
+- url: http://petstore.swagger.io/v1
+tags:
+- name: User
+  description: Everything that users can do
+- name: Admin
+  description: Everything that admins can do
+  
+paths:
+
+  /user/profile/{id}:
+    put:
+      tags:
+      - User
+      summary: Update an existing profile
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      operationId: updateProfile
+      requestBody:
+        description: Profile object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Profile'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Profile'
+        required: true
+      responses:
+        200:
+          description: Profile response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: Profile not found
+          content: {}
+        405:
+          description: Validation exception
+          content: {}
+      x-codegen-request-body-name: body
+      
+  /user/profile:
+    post:
+      tags:
+      - User
+      summary: Add a new profile
+      operationId: addProfile
+      requestBody:
+        description: Profile object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Profile'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Profile'
+        required: true
+      responses:
+        200:
+          description: Profile response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        405:
+          description: Invalid input
+          content: {}
+      x-codegen-request-body-name: body
+  
+  /user/findPersonByName:
+    get:
+      tags:
+      - User
+      summary: Find a person by this name
+      parameters:
+      - name: firstName
+        in: query
+        required: true
+        description: First name that the method needs to do the search
+        schema:
+          type: string
+      operationId: findPersonByName
+      responses:
+        200:
+          description: Person searh by the user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:  
+                  $ref: '#/components/schemas/Person'
+        404:
+          description: Person not found
+          content: {}
+  
+  /user/findPersonByEmail:
+    get:
+      tags:
+      - User
+      summary: Find a person by this email
+      parameters:
+      - name: email
+        in: query
+        required: true
+        description: Email that the method needs to do the search
+        schema:
+          type: string
+      operationId: findPersonByEmail
+      responses:
+        200:
+          description: Person search by the user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:  
+                  $ref: '#/components/schemas/Person'
+        404:
+          description: Person not found
+          content: {}
+  
+  /user/contact:
+    post:
+      tags:
+      - User
+      summary: Add a new contact
+      operationId: addContact
+      requestBody:
+        description: Contact object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Contact'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Contact'
+        required: true
+      responses:
+        200:
+          description: Contact response
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Contact'
+        405:
+          description: Invalid input
+          content: {}
+      x-codegen-request-body-name: body
+  
+  /user/contact/{id}:
+    put:
+      tags:
+      - User
+      summary: Update an existing contact
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      operationId: updateContact
+      requestBody:
+        description: Contact object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Contact'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Contact'
+        required: true
+      responses:
+        200:
+          description: Contact response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: Contact not found
+          content: {}
+        405:
+          description: Validation exception
+          content: {}
+      x-codegen-request-body-name: body
+  
+  /user/findAllContact/{id}:
+    get:
+      tags:
+      - User
+      parameters:
+      - name: id
+        in: path
+        description: id of the user, to search all the contact of this user
+        required: true
+        schema:
+          type: integer
+      summary: Find all the contact declare by the user
+      operationId: findAllContact
+      responses:
+        200:
+          description: All Contact created by the user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:  
+                  $ref: '#/components/schemas/Contact'
+        404:
+          description: No contact found
+          content: {}
+          
+  /user/deleteContact/{id}:
+    delete:
+      tags:
+      - User
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      summary: Delete an existing contact
+      operationId: deleteContact
+      responses:
+        200:
+          description: Contact deleted by the user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: Contact not found
+          content: {}
+          
+  /user/declareCovid/{id}:
+    put:
+      tags:
+      - User
+      summary: Update an existing declaration
+      parameters:
+      - name: id
+        in: path
+        description: profile's id of the user
+        required: true
+        schema:
+          type: integer
+      operationId: declareCovid
+      requestBody:
+        description: Declaration object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Declaration'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Declaration'
+        required: true
+      responses:
+        200:
+          description: Declaration response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Declaration'
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: Declaration not found
+          content: {}
+        405:
+          description: Validation exception
+          content: {}
+      x-codegen-request-body-name: body
+      
+  /admin/findUserByName:
+    get:
+      tags:
+      - Admin
+      summary: Find an user by this name
+      parameters:
+      - name: firstName
+        in: query
+        required: true
+        description: First name that the method needs to do the search
+        schema:
+          type: string
+      operationId: findUserByName
+      responses:
+        200:
+          description: User search by the admin
+          content:
+            application/json:
+              schema:
+                type: array
+                items:  
+                  $ref: '#/components/schemas/Person'
+        404:
+          description: User not found
+          content: {}
+          
+  /admin/findUserByEmail:
+    get:
+      tags:
+      - Admin
+      summary: Find an user by this email
+      parameters:
+      - name: email
+        in: query
+        required: true
+        description: Email that the method needs to do the search
+        schema:
+          type: string
+      operationId: findUserByEmail
+      responses:
+        200:
+          description: User search by the admin
+          content:
+            application/json:
+              schema:
+                type: array
+                items:  
+                  $ref: '#/components/schemas/Person'
+        404:
+          description: User not found
+          content: {}
+  
+  /admin/getUserProfile/{id}:
+    get:
+      tags:
+      - Admin
+      summary: Find an user's profile
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: id of the user's profile
+        schema:
+          type: integer
+      operationId: findUserProfile
+      responses:
+        200:
+          description: User's profile search by the admin
+          content:
+            application/json:
+              schema:
+                type: array
+                items:  
+                  $ref: '#/components/schemas/Profile'
+        404:
+          description: User's profile not found
+          content: {}
+  
+  /admin/getUserContacts/{id}:
+    get:
+      tags: 
+      - Admin
+      summary: Find all the contacts of an user
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: id of the user
+        schema:
+          type: integer
+      operationId: getUserContacts
+      responses:
+        200:
+          description: Contacts search by the admin
+          content:
+            application/json:
+              schema:
+                type: array
+                items:  
+                  $ref: '#/components/schemas/Contact'
+        404:
+          description: User's profile not found
+          content: {}
+  
+  /admin/sendNotification:
+    post:
+      tags:
+      - Admin
+      summary: send a notif to several users
+      operationId: sendNotification
+      parameters:
+      - name: notif
+        in: query
+        required: true
+        description: notif that the method needs to send
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+      - name: users
+        in: query
+        required: true
+        description: users who will receive the notif
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/Profile'
+      responses:
+        200:
+          description: List of user contacted by the admin
+          content:
+            application/json:
+              schema:
+                type: array
+                items:  
+                  $ref: '#/components/schemas/Profile'
+        404:
+          description: User not found
+          content: {}
+          
+components:
+  schemas:
+    Profile:
+      required:
+      - email
+      - lastName
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32 
+        firstName:
+          type: string
+        lastName:
+          type: string
+        age:
+          type: integer
+          format: int32
+        address:
+          type: string
+        email:
+          type: string
+        covidStatus:
+          $ref: '#/components/schemas/Declaration'
+        numberOfContacts:
+          type: integer
+          format: int32
+      xml:
+        name: Profile
+    Person:
+      required:
+      - firstName
+      - lastName
+      - email
+      type: object
+      properties: 
+        firstName: 
+          type: string
+        lastName:
+          type: string
+        email: 
+          type: string
+      xml:
+        name: Person
+    Contact:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        dateOfContact: 
+          type: string
+          format: date-time
+        placeOfContact: 
+          type: string
+        typeOfContact:
+          type: string
+          enum: 
+          - with mask
+          - without mask
+        person:
+          $ref: '#/components/schemas/Person'
+    Declaration:
+      type: object
+      properties:
+        dateOfTest: 
+          type: string
+          format: date
+        COVID: 
+          type: boolean
+    Notification:
+      type: object
+      properties:
+        id: 
+          type: integer
+          format: int32
+        sickPersonId:
+          type: integer
+          format: int32
+        contactDate:
+          type: string
+          format: date

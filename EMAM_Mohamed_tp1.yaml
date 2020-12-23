@@ -1,0 +1,445 @@
+#Emam Mohamed swagger file
+openapi: 3.0.0
+info:
+  title: Stop COVID
+  description: 'Ma `super` API contre le COVID'
+  license:
+    name: MIT
+  version: 1.0.0
+servers:
+- url: http://petstore.swagger.io/v1
+tags:
+- name: user
+  description: API pour la gestion du profile
+- name : user.contact
+  description : API pour la gestion des contacts
+- name: admin
+  description: API côté administrateur
+paths:
+  /user:
+    post:
+      tags:
+      - user
+      summary: Créer son profile
+      operationId: addProfile
+      requestBody:
+        description: L'utilisateur crée son profile. Il peut renseigner son nom, prénom, âge, adresse, email.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Profile'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Profile'
+        required: true
+      responses:
+        200:
+          description: Profile added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile-With-Id'
+        400:
+          description: Invalid input
+          content: {}
+          
+  /user/{id}/profile:
+    get:
+      tags:
+      - user
+      summary: Afficher son profile
+      operationId: getProfile
+      parameters:
+      - name: id
+        in: path
+        description: 'Id du profile'
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Profile showed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        400:
+          description: Invalid input id or method not allowed with this permission
+          content: {}
+          
+
+    put:
+      tags:
+      - user
+      summary: Modifier son profile
+      operationId: updateProfile
+      parameters:
+      - name: id
+        in: path
+        description: 'Id du profile'
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: Element du profile sujet à modification
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Profile'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Profile'
+        required: true
+      responses:
+        200:
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile-With-Id'
+        400:
+          description : Fail to update profile
+          content: {}
+          
+  /user/{id}/contact/{idContact}:
+    get:
+      tags:
+      - user.contact
+      summary: Afficher un contact en particulier 
+      parameters:
+      - name: id
+        in: path
+        description: 'Id du profile'
+        required: true
+        schema:
+          type: integer
+      - name: idContact
+        in: path
+        description: 'Id du contact'
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Contact loaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+        400:
+          description : Fail to load contacts
+          content : {}
+          
+    post:
+      tags:
+      - user.contact
+      summary: Ajouter un contact grâce a son identifiant
+      operationId: addContact
+      parameters:
+      - name: id
+        in: path
+        description: 'Id du profile'
+        required: true
+        schema:
+          type: integer
+      - name: idContact
+        in: path
+        description: 'Id du contact'
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: L'utilisateur peut ajouter un contact. Il doit fournir la date et heure du contact, le lieu du contact, le type de contact, id du contact.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Contact'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Contact'
+        required: true
+      responses:
+        200:
+          description: Contact added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+        400:
+          description: Invalid input
+          content: {}
+    delete:   
+      tags:
+      - user.contact
+      summary: Supprimer le contact
+      operationId: deleteContact
+      parameters:
+      - name: id
+        in: path
+        description: 'Id du profile'
+        required: true
+        schema:
+          type: integer
+      - name: idContact
+        in: path
+        description: 'Id du contact'
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Contact deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+        400:
+          description : Fail to delete contact
+          content: {}
+          
+          
+  /user/{id}/contacts:
+    get:
+      tags:
+      - user.contact
+      summary: Afficher les contacts du profile
+      parameters:
+      - name: id
+        in: path
+        description: 'Id du profile'
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Contacts showed successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/Profile'
+        400:
+          description : Fail to load contacts
+          content : {}
+          
+    
+  /user/{id}/declaration:
+    post:
+      tags:
+      - user
+      summary: Déclaration cas Covid
+      operationId: addDeclaration
+      parameters:
+      - name: id
+        in: path
+        description: 'Id du profile'
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: L'utilisateur peut se déclarer malade du covid
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Covid-Declaration'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Covid-Declaration'
+        required: true
+      responses:
+        200:
+          description: Contact added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Covid-Declaration'
+        400:
+          description: Invalid input
+          content: {}
+          
+ 
+          
+  /admin/user/find:
+    get:
+      tags:
+      - admin
+      summary: Un administrateur peut rechercher un utilisateur . On peut supposer qu'il y a des filtres sur la page pour rechercher soit par nom soit par mail.
+      parameters:
+      - name: lastname
+        in: query
+        description: 'Nom de famille du profile'
+        required: false
+        schema:
+          type: string
+      - name: email
+        in: query
+        description: 'Email du profile'
+        required: false
+        schema:
+          type: string
+          
+      responses:
+        200:
+          description: User successfully loaded
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Profile-By-Name-Email'
+   
+  /admin/user/{id}/profile:
+    get:
+      tags:
+      - admin
+      summary: Afficher le profile complet d'un utilisateur
+      parameters:
+      - name: id
+        in: path
+        description: 'Id du profile'
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Profile successfully loaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin-View-Profile'
+                
+  /admin/user/{id}/contacts:
+    get:
+      tags:
+      - admin
+      summary: Afficher tous les contacts d'un utilisateur
+      parameters:
+      - name: id
+        in: path
+        description: 'Id du profile'
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Contacts showed successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Contact'  
+  
+components:
+  schemas:
+    Profile:
+      required:
+      - lastName
+      - email
+      type: object
+      properties:
+        lastName:
+          type: string
+        firstName:
+          type: string
+        age:
+          type: integer
+          format: int32
+        adresse:
+          type: string
+        email:
+          type: string
+          
+    Admin-View-Profile:
+      required:
+      - lastName
+      - email
+      type: object
+      properties:
+        lastName:
+          type: string
+        firstName:
+          type: string
+        age:
+          type: integer
+          format: int32
+        adresse:
+          type: string
+        email:
+          type: string
+        covidStatus:
+          type: string
+          enum: 
+          - infected
+          - clean
+        contactNumber:
+          type: integer
+          format: int32
+          
+      xml:
+        name: Profile
+    
+    Profile-By-Name-Email:
+      type: object
+      properties:
+        lastName:
+          type: string
+        firstName:
+          type: string
+        email:
+          type: string
+      xml:
+        name: Profile-By-Name-Email
+    
+    Profile-With-Id:
+      required:
+      - lastName
+      - email
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        lastName:
+          type: string
+        firstName:
+          type: string
+        age:
+          type: integer
+          format: int32
+        adresse:
+          type: string
+        email:
+          type: string
+          
+      xml:
+        name: Profile
+    Contact:
+      required:
+      - date
+      type: object
+      properties:
+        idContact:
+          type: integer
+          format: int64
+        date:
+          type: string
+          format: date-time
+        ville:
+          type: string
+        mask:
+          type: boolean
+      xml:
+        name: Contact
+    Covid-Declaration:
+      required: 
+      - date-test
+      properties:
+        id:
+          type: integer
+          format: int64
+        date-test:
+          type: string
+          format: date-test
+ 

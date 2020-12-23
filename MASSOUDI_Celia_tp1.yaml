@@ -1,0 +1,436 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Stop COVID
+  description: Ma super API contre le COVID
+  license:
+    name: MIT
+servers:
+  - url: http://stopcovid.swagger.io/v1
+tags:
+- name: "user"
+  description: "'user' traite les différentes opérations réalisables par un utilisateur qui s'inscrit sur l'application stop covid. Toutes les opérations décrites, exceptées la création de compte supposent que l'utilisateur soit connectés"
+- name: "admin"
+  description: "Cette seconde API s'intéresse aux opérations réalisable par les administrateurs de l'application.Toutes les opérations décrites supposent que l'utilisateur soit connecté"
+paths:
+  /user:
+    post:
+      tags:
+      - "user"
+      summary: "Create a user"
+      description: "Cette méthode post a pour objectif de créer un compte utilisateur. L'utilisateur remplit les différents champs, à minima les champs obligatoires (voir schéma). Puis ces informations sont envoyées au back qui va crée l'utilisateur "
+      operationId: "addUser"
+      parameters:
+      - in: "query"
+        name: "query"
+        description: "Create user object to Stop Covid"
+        required: true
+        schema:
+          $ref: "#/components/schemas/User"
+      responses:
+        "202":
+          description: "User successfully created"
+        "405":
+          description: "Invalid input"
+  /user/{id}: 
+    put:
+      tags:
+      - "user"
+      summary: "Updated user"
+      description: "Cette méthode permet de mettre à jour le profil d'un utilisateur. Les informations de l'utilisateur sont chargés grâce à son id. l'utilisareur modifie ces informations et la requête est envoyé à l'aide de put"
+      operationId: "updateUser"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "name that need to be updated"
+        required: true
+        schema:
+          $ref: "#/components/schemas/User"
+      - in: "query"
+        name: "query"
+        description: "Updated user object"
+        required: true
+        schema:
+          $ref: "#/components/schemas/User"
+      responses:
+        "202":
+          description: "User successfully updated"
+        "404":
+          description: "User not found"
+  /user/{id}/contact:
+    post:
+      tags:
+      - "user"
+      summary: "Adding a contact"
+      description: "Cette méthode créée un nouveau cas contact. Pour se faire on utilise la méthode post, fonctionne de la même manière que pour créer un nouvel utilisateur. Les informations sont chargés sur la page à partir de l'id de l'utilisateur."
+      operationId: "addingContactUser"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "id de la personne qui déclare le cas contact "
+        required: true
+        schema:
+          $ref: "#/components/schemas/User"
+      - in: "query"
+        name: "query"
+        description: "Information about the contact case : like the place or the date"
+        required: true
+        schema:
+          $ref: "#/components/schemas/Contact"
+      responses:
+        "202":
+          description: "User contact successfully added"
+        "400":
+          description: "Invalid operation"
+  /user/contact/{name}:
+    get:
+      tags:
+      - "user"
+      summary: "Research a user"
+      description: "Permet de rechercher un utilisateur que l'on souhaite ajouter en tant que contact mais par son nom grâce à la méthode get"
+      operationId: "getUserByName"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "name of the contact user"
+        required: true
+        schema:
+          $ref: "#/components/schemas/Users"
+      responses:
+        "202":
+          description: "User contact successfully find"
+        "404":
+          description: "The user doesn't exist"
+  /user/contact/{email}:
+    get:
+      tags:
+      - "user"
+      summary: "Research a user"
+      description: "Permet de rechercher un utilisateur que l'on souhaite ajouter en tant que contact mais par son nom grâce à la méthode get"
+      operationId: "getUserByMail"
+      parameters:
+      - name: "email"
+        in: "path"
+        description: "email of the contact user"
+        required: true
+        schema:
+          $ref: "#/components/schemas/Users"
+      responses:
+        "202":
+          description: "User contact successfully find"
+        "404":
+          description: "The user doesn't exist"
+  /user/{id}/contacts: 
+    get:
+      tags:
+      - "user"
+      summary: "List of contact case"
+      description: "Cette méthode get va rechercher pour un utilisateur (grâce à son id) la liste d'utilisateurs qui sont cas contact."
+      operationId: "getListOfContactUser"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "id de cette personne va permettre de récupérer la liste de cas contact"
+        required: true
+        schema:
+          $ref: "#/components/schemas/User"
+      - name: "user"
+        in: "query"
+        description: "id of the user who wants to see his contacts user"
+        required: true
+        schema:
+          $ref: "#/components/schemas/Contacts"
+      responses:
+        "202":
+          description: "User contact successfully find"
+        "404":
+          description: "The user doesn't exist"
+  /user/contacts/{idContact}:
+    delete : 
+      tags:
+      - "user"
+      summary: "Delete a contact user"
+      description: "Pour supprimer un cas contact l'utilisateur clique dans un utilisateur de sa liste de cas contact et clique sur le bouton suprrimer. ce bouton envoie une requête delete. L'utilisatuer est supprimé grâce à l'id du cas contact. Idcontact correspond à l'id du de la rencontre et non pas des deux utilisateurs qui sont cas contact"
+      operationId: "deleteContactUser"
+      parameters:
+      - name: "idContact"
+        in: "path"
+        description: "Contact id to delete"
+        required: true
+        schema: 
+          $ref: "#/components/schemas/Contact"
+      responses:
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Pet not found"
+    put:
+      tags:
+      - "user"
+      summary: "Updated contact"
+      description: "A partir de sa liste de cas contact, l'utilisateur peut aussi modifier les informations du cas contact. Tout ocmme la suppressiookn cette modification est possible grâce à l'id du contact. La reqûete de la modification est envoyée via put"
+      operationId: "updateContactUser"
+      parameters:
+      - name: "idContact"
+        in: "path"
+        description: "Contact id to updated"
+        required: true
+        schema:
+          $ref: "#/components/schemas/Contact"
+      - in: "query"
+        name: "query"
+        description: "Updated contact object"
+        required: true
+        schema:
+          $ref: "#/components/schemas/Contact"
+      responses:
+        "202":
+          description: "Contact successfully updated"
+        "404":
+          description: "Contact not found"
+  /user/covid: 
+    post:
+      tags:
+      - "user"
+      summary: "Having the covid"
+      description: "Lorsqu'un utilisateur a le covid il le déclare dans l'application en indiquant la date de son test. Cela va créer une liste de contacts vide. Il pourra par la suite ajouter les cas contacts. Dans la fiche utilisateurs, le champ covid passe alors à positif. "
+      operationId: "addingCovidUser"
+      parameters:
+      - in: "query"
+        name: "query"
+        description: "The user write the date of the positive test"
+        required: true
+        schema:
+          $ref: "#/components/schemas/Contacts"
+      responses:
+        "202":
+          description: "User having covid successfully added"
+        "400":
+          description: "Invalid operation"
+          
+  /admin/{name}: 
+    get:
+      tags:
+      - "admin"
+      summary: "Research a user"
+      description: "grâce à get, l'utilisateur peut chercher un utilisateur par nom. Le fonctionnement est semblable à la recherche par nom que peut faire l'utilisateur. "
+      operationId: "getUserByNameForAdmin"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "name of the contact user"
+        required: true
+        schema:
+          $ref: "#/components/schemas/Users"
+      responses:
+        "202":
+          description: "User contact successfully find"
+        "404":
+          description: "The user doesn't exist"  
+          
+  /admin/{mail}: 
+    get:
+      tags:
+      - "admin"
+      summary: "Research a user"
+      description: "grâce à get, l'utilisateur peut chercher un utilisateur par mail.  Le fonctionnement est semblable à la recherche par mail que peut faire l'utilisateur."
+      operationId: "getUserByMailForAdmin"
+      parameters:
+      - name: "mail"
+        in: "path"
+        description: "mail of the contact user"
+        required: true
+        schema:
+          $ref: "#/components/schemas/Users"
+      responses:
+        "202":
+          description: "User successfully find"
+        "404":
+          description: "The user doesn't exist"
+          
+  /admin/{mail}/list: 
+    get:
+      tags:
+      - "admin"
+      summary: "List of users"
+      description: "Après avoir chercher un mail, l'admin voit la liste des utilisateurs possédant ce mail là. "
+      operationId: "getListOfUsersFindByMail"
+      parameters:
+      - name: "mail"
+        in: "path"
+        description: "mail of the user who is research"
+        required: true
+        schema:
+          $ref: "#/components/schemas/Users"
+      responses:
+        "202":
+          description: "List of user by mail successfully find"
+        "404":
+          description: "No user with this mail exist"
+          
+  /admin/{name}/list: 
+    get:
+      tags:
+      - "admin"
+      summary: "List of users"
+      description: "Après avoir chercher un mail, l'admin voit la liste des utilisateurs possédant ce nom là"
+      operationId: "getListOfUsersFindByName"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "name of the user who is research"
+        required: true
+        schema:
+          $ref: "#/components/schemas/Users"
+      responses:
+        "202":
+          description: "List of user by name successfully find"
+        "404":
+          description: "No user with this name exist"
+  
+  /admin/{id}: 
+    get:
+      tags:
+      - "admin"
+      summary: "See a user profile"
+      description: "En cliquant sur un élément de la liste d'utilisateurs. une requête get est envoyé, elle contient l'id de l'utilisateur et utilise la méthode getUserById"
+      operationId: "getUserById"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "id of the user to see his profile"
+        required: true
+        schema:
+          $ref: "#/components/schemas/User"
+      responses:
+        "202":
+          description: "User successfully find"
+        "404":
+          description: "User not exist"
+  
+  /admin/{id}/contact: 
+    get:
+      tags:
+      - "admin"
+      summary: "List of contact case"
+      description: "Voir la liste de cas contact à partir de l'id de l'utilisateur malade. Cela est possible à partir de page du profil de l'utilisateur ou l'id de l'utilisateur a déja été récupéré. Cette fois ci on recherche dans la liste contacts où les cas contacts qu'il a déclaré sont disponible"
+      operationId: "getListOfContactUserById"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "id of the user who wants to see his contacts user"
+        required: true
+        schema:
+          $ref: "#/components/schemas/Contacts"
+      responses:
+        "202":
+          description: "Users contact successfully find"
+        "404":
+          description: "The user doesn't exist"
+  
+  /admin/{id}/notify: 
+    post:
+      tags:
+      - "user"
+      summary: "Notify contact cases"
+      description: "Notifier les cas contacts à l'aide de l'id de la personne testé positive"
+      operationId: "SendNotificationtoContactCase"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Identifiant de la personne malade. A partir de cet id, on va pouvoir récupérer dans la table Contact, sa date de test auquel il a été positif, mais aussi la liste des cas Contact. En fisant une jointure avec cette id on peut également retrouver le nom de l'utilisateur dans la table User"
+        required: true
+        schema:
+          $ref: "#/components/schemas/Contacts"
+      - in: "query"
+        name: "query"
+        description: "Le message envoyé contient la date de test et l'identifiant de la personne ayant le covid"
+        required: true
+        schema:
+          $ref: "#/components/schemas/Contacts"
+      responses:
+        "202":
+          description: "Sending notification to users contact successfully"
+        "400":
+          description: "Invalid operation"
+  
+    
+components:
+  schemas:
+    User:
+      description: "Cet objet décrit l'utilisateur. Les informations obligatoires sont celles qu'il doit remplir à minima lorsqu'il crée son compte stop covid. L'id s'autoremplit. Lorsque l'utilisateur a le covid, le champ covid passe à true."
+      type: object
+      required:
+        - id
+        - name
+        - email
+      properties: 
+        id: 
+          type: string
+        name: 
+          type: string
+        surname: 
+          type: string
+        years: 
+          type: integer
+        address: 
+          type: string
+        email:
+          type: string
+        covid : 
+          type: boolean
+          default: false
+    Users:
+      description: "Cet objet est une liste d'utilisateurs. Cela permet d'utiliser les fonctionnalités de recherche par nom ou par mail. Mais aussi de créer une liste Users dans les cas contacts. Les propriétes sont celles que l'on voit lors de la recherche. (Je ne suis cependant pas sure de cette manière d'écrire"
+      type: array
+      properties: 
+        name: 
+          $ref: "#/components/schemas/User"
+        surname: 
+          $ref: "#/components/schemas/User"
+        email:
+          $ref: "#/components/schemas/User"
+      items:
+        $ref: "#/components/schemas/User"
+    Contact: 
+      
+      type: object
+      required: 
+       - user
+       - date
+       - hour
+      properties :
+        idContact: 
+          type : integer
+        user : 
+          $ref: "#/components/schemas/User"
+        date : 
+          type: string
+        hour:
+          type: string
+        place:
+          type: string
+        contactType: 
+          type: string
+        contactUser:
+          $ref: "#/components/schemas/User"
+        contactName: 
+          type: string
+        contactMail: 
+          type: string
+        contactsurname: 
+          type: string 
+    Contacts:
+      description: "Liste les cas contacts d'un utilisateur de l'application stop covid. Contient aussi la date du test positif. A chaque fois que quelq'un déclare avoir le covid une liste de cas contacts (même vide) est automatiquement crée. Ce système permettrait par la suite d'envoyer une notif au malade pour qu'il déclare ces cas contacts."
+      type: array
+      required: 
+        - id 
+        - dateTestCovid
+      properties: 
+        id: 
+          $ref: "#/components/schemas/User"  
+        dateTestCovid : 
+          type: string
+      items:
+        $ref: "#/components/schemas/Contact"
+       

@@ -1,0 +1,457 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Stop COVID
+  description: Ma super API contre le COVID
+  license:
+    name: MIT
+servers:
+  - url: http://localhost:8080
+paths:
+  /users:
+    get:
+      summary: Liste des utilisateurs
+      description: Retourne tout les utilisateurs pour que l'administrateur puisse trouver celui sur lequel travailler.
+      tags:
+        - users
+      parameters:
+        - name: page
+          schema: 
+            type: integer
+          in: query
+          description: numéro de la page à retourner afin de récupérer la bonne page correspondant à l'utilisateur
+        - name: pageSize
+          schema: 
+            type: integer
+          in: query
+          description: nombre de contacts par page afin de bien gérer la pagination
+      responses:
+        '200':
+          description: page result
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/usersList"
+        '400':
+          description: network problem. Verify your internet connection
+        '500':
+          description: the server seems to be down. Retry later
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDefinition"
+  /user:
+    post:
+      summary: Crée un utilisateur depuis le profil afin de respecter le besoin. Cette requête peut être utilisée pour s'inscrire ou pour inscrire un cas contact.
+      tags:
+        - user
+      requestBody:
+        content: 
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/profile'
+      responses:
+        '200':
+          description: The user has been correctly created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/profile"
+        '400':
+          description: network problem. Verify your internet connection
+        '500':
+          description: the server seems to be down. Retry later
+  /user/{userId}:
+    parameters:
+      - $ref: "#/components/parameters/userId"
+    get:
+      summary: Récupère les informations d'un utilisateur. On peut également retrouver un cas contact avec cette requête car les cas contacts possèdent également un UserId
+      tags:
+        - user
+      responses:
+        '200':
+          description: user id exists. get user by id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user"
+        '400':
+          description: network problem. Verify your internet connection
+        '500':
+          description: the server seems to be down. Retry later
+    put:
+      summary: Met à jour un utilisateur avec les informations nécessaires
+      tags:
+        - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/profile"
+      responses:
+        '200':
+          description: contact correctly updated by id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/profile"
+        '400':
+          description: network problem. Verify your internet connection
+        '500':
+          description: the server seems to be down. Retry later
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDefinition"
+  /user/{userId}/covidDeclaration:
+    parameters:
+      - $ref: "#/components/parameters/userId"
+    post:
+      summary: Crée une déclaration de covid pour qu'un utilisateur puisse se déclarer malade avec comme précision la date de son test et son id.
+      tags:
+        - user
+      requestBody:
+        content: 
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/covidDeclared'
+      responses:
+        '200':
+          description: The declaration has been correctly registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/covidDeclared"
+        '400':
+          description: network problem. Verify your internet connection
+        '500':
+          description: the server seems to be down. Retry later
+  /contact:
+    post:
+      summary: Permet de créer ou de modifier un contact avec les attributs nécessaires
+      tags:
+        - contact
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/contact'
+      responses:
+        '200':
+          description: The contact has been correctly created/modified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/contact'
+        '400':
+          description: network problem. Verify your internet connection
+        '500':
+          description: the server seems to be down. Retry later
+    get:
+      summary: Permet de récupérer une liste paginée de contacts
+      description: Retourne tout les contacts
+      tags:
+        - contact
+      parameters:
+        - name: userId
+          schema:
+           type: string
+          in: query
+          description: id de l'utilisateur correspondant au contact
+        - name: page
+          schema: 
+            type: integer
+          in: query
+          description: numéro de la page à retourner
+        - name: pageSize
+          schema: 
+            type: integer
+          in: query
+          description: nombre de contacts par page
+      responses:
+        '200':
+          description: page result
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/contactList"
+        '400':
+          description: network problem. Verify your internet connection
+        '500':
+          description: the server seems to be down. Retry later
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDefinition"
+  /contact/{userId}:
+    parameters:
+      - $ref: "#/components/parameters/userId"
+    get:
+      summary: Liste des contacts d'un utilisateur
+      description: Permet de récupérer l'ensemble des contacts d'un utilisateur.
+      tags:
+        - contact
+      parameters:
+        - name: userId
+          schema:
+           type: string
+          in: query
+          description: id de l'utilisateur correspondant au contact
+        - name: page
+          schema: 
+            type: integer
+          in: query
+          description: numéro de la page à retourner
+        - name: pageSize
+          schema: 
+            type: integer
+          in: query
+          description: nombre de contacts par page
+      responses:
+        '200':
+          description: page result
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/contactList"
+        '400':
+          description: network problem. Verify your internet connection
+        '500':
+          description: the server seems to be down. Retry later
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDefinition"
+  /contact/{userId}/covidAlert:
+    parameters:
+      - $ref: "#/components/parameters/userId"
+    post:
+      summary: Permet à l'administrateur de notifier l'ensemble des cas contact de la liste de l'utilisateur à partir de son id
+      tags:
+        - user
+      requestBody:
+        content: 
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/covidAlert'
+      responses:
+        '200':
+          description: The notification has been sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/covidAlert"
+        '400':
+          description: network problem. Verify your internet connection
+        '500':
+          description: the server seems to be down. Retry later
+  /contact/{contactId}:
+    parameters:
+      - $ref: "#/components/parameters/contactId"
+    put:
+      summary: Met à jour un contact
+      tags:
+        - contact
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/contact"
+      responses:
+        '200':
+          description: contact correctly update
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/contact"
+        '400':
+          description: network problem. Verify your internet connection
+        '500':
+          description: the server seems to be down. Retry later
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDefinition"
+    delete:
+      summary: Supprime le contact
+      tags: 
+        - contact
+      description: supprime le contact
+      responses:
+        '200':
+          description: contact has been deleted
+        '400':
+          description: network problem. Verify your internet connection
+        '500':
+          description: the server seems to be down. Retry later
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDefinition"
+components:
+##Ces paramêtres permettent de récupérer les ID dans les paths.
+  parameters:
+    contactId:
+      name: contactId
+      in: path
+      required: true
+      description: identifiant du contact à récupérer
+      schema:
+        type: string
+    userId:
+      name: userId
+      in: path
+      required: true
+      description: identifiant de l'utilisateur à récupérer
+      schema:
+        type: string
+  schemas:
+    pageData:
+      description: objet générique pour les résultats de recherche. On l'utilise dans plusieurs path afin de récupérer une liste paginée d'objets.
+      type: object
+      properties:
+        page: 
+          type: integer
+          description: le numéro de la page courante
+        nbElements:
+          description: le nombre total d'element
+          type: integer
+    userSummary:
+      description: Résumé simple d'un utilisateur ou d'un cas contact avec les seuls attributs utile. On utilise cette objet lorsque l'on veut le moins d'information possible sur un utilisateur / cas contact
+      type: object
+      properties:
+        firstname:
+          type: string
+          description: prénom de l'utilisateur
+        lastname: 
+          type: string
+          description: nom de famille de l'utilisateur
+        mail:
+          type: string
+          description: mail de l'utilisateur
+      required:
+        - firstname
+        - mail
+    profile:
+      description: Ce schéma hérite des attributs de userSummary en ajoutant l'age et l'adresse. Permet d'apporter plus de précision sur un utilisateur
+      allOf:
+        - $ref: "#/components/schemas/userSummary"
+      properties:
+        age:
+          type: string
+          description: age de l'utilisateur
+        adresse:
+          type: string
+          description: adresse de l'utilisateur
+    user:
+      description: Ce schéma permet d'ajouter un ID à un utilisateur en lui permettant ensuite d'apporter des informations nécessaires à l'administrateur comme le statut covid et la liste des contacts d'un utilisateur
+      allOf:
+        - $ref: "#/components/schemas/profile"
+      properties:
+        id:
+          type : string
+          description : identifiant d'un utilisateur
+        covidStatus:
+          type: string
+          description: statut covid de l'utilisateur
+          enum:
+           - COVID
+           - NO_COVID
+        contacts :
+          type: array
+          description : liste des contacts de l'utilisateur
+          items :
+           $ref: "#/components/schemas/contact"
+    contact:
+      description : Ce schéma permet d'avoir les attributs nécessaire au contact.
+      allOf:
+        - $ref: "#/components/schemas/userSummary"
+      properties :
+        id:
+          description : id du contact
+          type: string
+        date: 
+          description: date du cas-contact
+          type: string
+          format: date-time
+        place: 
+          type: string
+          description: endroit ou a eu lieu le contact
+        contactType :
+          type : string
+          description: type du contact avec ou sans masque
+          enum:
+            - WITH_MASK
+            - WITHOUT_MASK
+    usersList:
+      description: Schéma qui récupère les utilisateurs dans un tableau en utilisant également les attribut du pagedata afin de bénéficier de ses avantages.
+      allOf:
+        - $ref: "#/components/schemas/pageData"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/userSummary"
+    contactList:
+      description: Schéma qui récupère les contacts dans un tableau en utilisant également les attribut du pagedata afin de bénéficier de ses avantages.
+      allOf:
+        - $ref: "#/components/schemas/pageData"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/contact"
+    covidDeclared:
+      description : Schéma correspondant à la déclaration covid d'un utilisateur
+      properties:
+        id:
+          type: string
+          description: identifiant de la déclaration
+        testDate:
+          description: date à laquelle le test a été effectué
+          type: string
+          format: date-time
+    covidAlert:
+      description: Schéma permettant de notifier les utilisateurs / cas contact en les récupérant dans un tableau de gens "à notifier"
+      properties:
+        id: 
+          type: string
+          description: identifiant de l'utilisateur infecté
+        tonotify:
+          description : liste des cas-contact de l'utilisateur
+          type: array
+          items:
+            $ref: "#/components/schemas/contact"
+    errorDefinition:
+      description: la description de l'erreur
+      type: object
+      properties:
+        errorType: 
+          type: string
+          description: le type d'erreur
+          enum:
+            - TECHNICAL
+            - FUNCTIONAL
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              errorCode: 
+                type: string
+                description: le code de l'erreur
+              errorMessage:
+                type: string
+                description: message d'erreur

@@ -1,0 +1,648 @@
+openapi: 3.0.1
+info:
+  title: TP1 - Tous COVID
+  description: Voici les spécifications répondant au TP°1.
+  contact:
+    name: ': Laura Alves - ING3 FISA'
+    email: laura.alves.fe@gmail.com
+  version: 1.0.0
+externalDocs:
+  description: Sujet du TP
+  url: https://docs.google.com/document/d/1xmvuSj5_AzTphgZeT8LRu1RWtI-RsUevq_34zy6DEPI/edit#heading=h.ru4lg114aec2
+
+servers:
+- url: http://localhost:8080/api/covid
+tags:
+- name: Profile
+  description: Gestion du profil utilisateur
+- name: User
+  description: Récupération des utilisateurs
+- name: Contact
+  description: Contact lié à un utilisateur
+- name: Admin
+  description: Fonctions administrateur
+
+paths:
+  /user:
+    post:
+      tags:
+      - Profile
+      summary: Création d'un utilisateur
+      description: Réponse à la problématique de création d'utilisateur.<br>Il permet la création d'un profil utilisateur. Les champs 'Nom' et 'Email' sont obligatoires, le champ 'Email' doit être unique sous peine d'avoir deux profils pour une même personne, ce n'est pas le cas pour le champ 'Nom' car des homonymes sont possibles.
+      operationId: createUser
+      requestBody:
+        description: Attributs de l'utilisateur à créer
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+        required: true
+      responses:
+        204:
+          description: Profil créé
+
+  /user/{id}:
+    put:
+      tags:
+      - Profile
+      summary: Modification d'un utilisateur
+      description: Réponse à la problématique de modification des informations d'un utilisateur.<br>Une fois l'utilisateur loggué, il pourra modifier ses informations grâce à son identifiant, on suppose que celui-ci est enregistré dans sa session. Sinon ce n'est pas la cas, il faudrait faire cette action via son email et il serait alors impossible de modifier celui-ci.
+      operationId: updateUser
+
+      parameters:
+      - name: id
+        in: path
+        description: Identifiant de l'utilsiateur à modifier
+        required: true
+        schema:
+          type: number
+      requestBody:
+        description: Attributs de l'utilisateur modifiés
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+        required: true
+
+      responses:
+        200:
+          description: Succès
+        400:
+          description: Identifiant invalide
+        404:
+          description: Utilisateur non trouvé
+
+  /user/{id}/status:
+    put:
+      tags:
+      - Profile
+      summary: Déclaration de maladie ou de fin de maladie COVID par un utilisateur
+      description: Réponse à la problématique de mis a jour du status de maladie par un utilisateur.<br>Une fois l'utilisateur loggué, il pourra déclarer sa maladie / sa guérison grâce à son identifiant, on suppose que celui-ci est enregistré dans sa session. Sinon ce n'est pas la cas, il faudrait faire cette action via son email.
+      operationId: updateUserStatus
+
+      parameters:
+      - name: id
+        in: path
+        description: Identifiant de l'utilisateur déclaré
+        required: true
+        schema:
+          type: number
+      requestBody:
+        description: Attributs de l'utilisateur modifiés
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/UserStatus'
+
+      responses:
+        200:
+          description: Succès
+        400:
+          description: Identifiant invalide
+        404:
+          description: Utilisateur non trouvé
+
+  /user/lastname/{lastname}:
+    get:
+      tags:
+      - User
+      summary: Récupération d'un utilisateur par son nom
+      description: Réponse à la problématique de récupération d'un utilisateur en vue de l'ajouter en tant que contact par un autre utilisateur.<br>Il est possible pour un utilisateur de rechercher un contact via son nom. Cette recherche pourra lui retourner plusieurs utilisateurs car des homonymes peuvent exister. Il faudra alors qu'il selectionne la bonne personne en vue que le système récupère l'identifiant de celle-ci dans un deuxième temps grâce à son email.<br> Par soucis de sécurité, l'adresse n'est pas récupérée car on considère que les autres champs suiffisent pour identifier quelqu'un.
+      operationId: getUserByLastname
+
+      parameters:
+      - name: lastname
+        in: path
+        description: Nom du contact cherché
+        required: true
+        schema:
+          type: string
+
+      responses:
+        200:
+          description: Succès - Renvoi des utilisateurs trouvés
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/UserFound'
+        400:
+          description: Nom invalide
+        404:
+          description: Utilisateur non trouvé
+
+  /user/email/{email}:
+    get:
+      tags:
+      - User
+      summary: Récupération d'un utilisateur par son email
+      description: Réponse à la problématique de récupération d'un utilisateur en vue de l'ajouter en tant que contact par un autre utilisateur.<br>Il est possible pour un utilisateur de rechercher un contact via son nom. Cette recherche lui retournera qu'un identifiant, l'email étant unique pour chaque utilisateur de la plateforme.
+      operationId: getUserByEmail
+
+      parameters:
+      - name: email
+        in: path
+        description: Email du contact cherché
+        required: true
+        schema:
+          type: string
+
+      responses:
+        200:
+          description: Succès - Renvoi de l'identifiant de l'utilisateur trouvé
+          content:
+            application/json:
+              schema:
+                type: number
+                example: 1
+        400:
+          description: Email invalide
+        404:
+          description: Utilisateur non trouvé
+
+  /user/{email}/contact:
+    get:
+      tags:
+      - Contact
+      summary: Récupération des contacts déclarés par un utilisateur grâce à son email
+      description: Réponse à la problématique de récupération de ses contacts par un utilisateur.<br>Il est possible pour un utilisateur d'accéder à tout ses contacts. Ceux-ci peuvent être des contacts internes ou externes à la plateforme.
+      operationId: getContactsByEmail
+
+      parameters:
+      - name: email
+        in: path
+        description: Email de l'utilisateur pour lequel il faut récupérer les contacts
+          contact
+        required: true
+        schema:
+          type: string
+
+      responses:
+        200:
+          description: Succès - Renvoi des contacts trouvés
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                    - $ref: '#/components/schemas/ContactGet'
+                    - $ref: '#/components/schemas/UserInfos'
+        400:
+          description: Email invalide ou champs insérés
+        404:
+          description: Utilisateur non trouvé
+
+    post:
+      tags:
+      - Contact
+      summary: Déclaration d'un contact par un utilisateur
+      description: Réponse à la problématique de déclarer un contact par un utilisateur.<br>Il est possible pour un utilisateur de déclarer des contacts. Il contient l'endroit du contact, la date / heure et le type de celui-ci ainsi qu'un contact. Ce contact peut être un utilisateur interne ou externe à la plateforme ; s'il est interne, c'est l'identifiant de l'utilisateur qui sera inséré, sinon son nom, prénom et son email seront insérés. L'utilisateur externe ne devient pas un utilisateur à part entière à l'application, son email devra être différent des autres contacts insérés pour cet utilisateur sous peine de déclarer deux fois un même contact par exemple.
+      operationId: postContact
+
+      parameters:
+      - name: email
+        in: path
+        description: Email de l'utilisateur qui déclare des contacts
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Attributs de la déclaration de contact à créer
+        content:
+          '*/*':
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/ContactDeclarationWithUser'
+                - $ref: '#/components/schemas/ContactDeclarationWithExternalUser'
+        required: true
+
+      responses:
+        200:
+          description: Succès
+        400:
+          description: Email invalide ou champs insérés
+        404:
+          description: Utilisateur non trouvé
+
+  /user/{email}/contact/{contactEmail}:
+    delete:
+      tags:
+      - Contact
+      summary: Suppression d'un contact par un utilisateur grâce à son email
+      description: Réponse à la problématique de suppression de contact par un utilisateur.<br>Il est possible pour un utilisateur de supprimer ses contacts, ses déclarations de contact. Cela se fait grâce à l'email de l'utilisateur et l'email du contact, les deux étant uniques.
+      operationId: deleteContactByEmailAndContactEmail
+
+      parameters:
+      - name: email
+        in: path
+        description: Email de l'utilisateur qui a déclaré ce contact
+        required: true
+        schema:
+          type: string
+      - name: contactEmail
+        in: path
+        description: Email du contact à supprimer
+        required: true
+        schema:
+          type: string
+
+      responses:
+        200:
+          description: Succès
+        400:
+          description: Email(s) invalide(s)
+        404:
+          description: Utilisateur(s) non trouvé(s)
+
+    put:
+      tags:
+      - Contact
+      summary: Modification d'un contact par un utilisateur grâce à son email
+      description: Réponse à la problématique de modification de contact par un utilisateur<br>Il est possible pour un utilisateur de modifier ses contacts, ses déclarations de contact. Cela est possible uniquement pour les contacts externes, les contacts internes à la plateforme pouvant être modifié que par eux-mêmes. Il peut modifier la date / heure du contact, le type et l'endroit ; pour un contact externe à l'application, il peut modifier son nom et prénom.
+      operationId: updateContactByEmailAndContactEmail
+
+      parameters:
+      - name: email
+        in: path
+        description: Email de l'utilisateur déclaré
+        required: true
+        schema:
+          type: string
+      - name: contactEmail
+        in: path
+        description: Email du contact à modifier
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Attributs de l'utilisateur modifiés
+        content:
+          '*/*':
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/ContactModifiyDeclarationWithExternalUser'
+                - $ref: '#/components/schemas/ContactModifiyDeclaration'
+
+      responses:
+        200:
+          description: Succès
+        400:
+          description: Email(s) invalide(s)
+        404:
+          description: Utilisateur(s) non trouvé(s)
+
+  /admin/user/lastname/{lastname}:
+    get:
+      tags:
+      - Admin
+      summary: Récupération d'un utilisateur par son nom
+      description: Réponse à la problématique de récupération d'un utilisateur par un administrateur via son nom.<br>Un administrateur peut récupérer un utilisateur par son nom, celui-ci n'étant pas unique, un tableau d'utilisateur (ou aucun) pourra lui être retourné.
+      operationId: getUserByLastnameForAdmin
+
+      parameters:
+      - name: lastname
+        in: path
+        description: Nom du contact cherché
+        required: true
+        schema:
+          type: string
+
+      responses:
+        200:
+          description: Succès - Renvoi de ou des utilisateurs trouvés
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                  - $ref: "#/components/schemas/UserGetByAdmin"
+        400:
+          description: Nom invalide
+        404:
+          description: Utilisateur(s) non trouvé(s)
+
+  /admin/user/email/{email}:
+    get:
+      tags:
+      - Admin
+      summary: Récupération d'un utilisateur par son email
+      description: Réponse à la problématique de récupération d'un utilisateur par un administrateur via son email.<br>Un administrateur peut récupérer un utilisateur par son email, celui-ci étant unique, un utilisateur (ou aucun) lui sera retourné.
+      operationId: getUserByEmailForAdmin
+
+      parameters:
+      - name: email
+        in: path
+        description: Email du contact cherché
+        required: true
+        schema:
+          type: string
+
+      responses:
+        200:
+          description: Succès - Renvoi de l'utilisateur trouvé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserGetByAdmin"
+        400:
+          description: Email invalide
+        404:
+          description: Utilisateur non trouvé
+
+  /admin/user/profile/{email}:
+    get:
+      tags:
+      - Admin
+      summary: Récupération d'un profil utilisateur par son email
+      description: Réponse à la problématique de récupération d'un profil utilisateur par un administrateur via son email.<br>Un administrateur peut récupérer le profil d'un utilisateur par son email, celui-ci étant unique, un profile utilisateur (ou aucun) lui sera retourné.
+      operationId: getUserProfileByEmailForAdmin
+
+      parameters:
+      - name: email
+        in: path
+        description: Email du contact cherché
+        required: true
+        schema:
+          type: string
+
+      responses:
+        200:
+          description: Succès - Renvoi de l'utilisateur trouvé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        400:
+          description: Email invalide
+        404:
+          description: Utilisateur non trouvé
+
+  /admin/contacts/{email}:
+    get:
+      tags:
+      - Admin
+      summary: Récupération des contacts d'un utilisateur par son email
+      description: Réponse à la problématique de récupération des contacts d'un utilisateur par un administrateur via son email.<br>Un administrateur peut récupérer les contacts d'un utilisateur, il lui sera retourné un tableau d'utilisateur internes et/ou externes (ou aucun).
+      operationId: getUserContactsByEmailForAdmin
+
+      parameters:
+      - name: email
+        in: path
+        description: Email du contact cherché
+        required: true
+        schema:
+          type: string
+
+      responses:
+        200:
+          description: Succès - Renvoi des utilisateurs trouvés
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                  - $ref: "#/components/schemas/UserProfile"
+                  - $ref: "#/components/schemas/Contact"
+        400:
+          description: Email invalide
+        404:
+          description: Utilisateur non trouvé
+
+  /admin/contacts/declaration/{email}:
+    get:
+      tags:
+      - Admin
+      summary: Récupération des déclarations de contact d'un utilisateur par son email
+      description: Réponse à la problématique de récupération des déclarations de contact d'un utilisateur par un administrateur via son email en vue de notifier ces contacts.<br>Un administrateur peut récupérer les déclaration de contact d'un utilisateur, il lui sera retourné un tableau d'utilisateur internes (ou aucun). Il pourra alors notifier cet (ses) utilisateur(s).
+      operationId: getUserContactDeclarationsByEmailForAdmin
+
+      parameters:
+      - name: email
+        in: path
+        description: Email du contact cherché
+        required: true
+        schema:
+          type: string
+
+      responses:
+        200:
+          description: Succès - Renvoi des utilisateurs trouvés
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ContactDeclaration"
+        400:
+          description: Email invalide
+        404:
+          description: Utilisateur non trouvé
+
+components:
+  schemas:
+    UserCreate:
+      required:
+      - email
+      - lastName
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        address:
+          type: string
+        age:
+          type: integer
+          format: int64
+        email:
+          type: string
+    UserFound:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        age:
+          type: integer
+          format: int64
+        email:
+          type: string
+    UserStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - SICK
+            - NOTSICK
+    UserInfos:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        address:
+          type: string
+        age:
+          type: integer
+          format: int64
+        email:
+          type: string
+        status:
+          type: string
+          enum:
+            - SICK
+            - NOTSICK
+    ContactGet:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+    ContactDeclarationWithUser:
+      required:
+      - place
+      - timestamp
+      - type
+      type: object
+      properties:
+        timestamp:
+          type: object
+          properties: {}
+        place:
+          type: string
+        type:
+          type: string
+          enum:
+          - MASK
+          - NOMASK
+        userId:
+          type: integer
+          format: int64
+    ContactDeclarationWithExternalUser:
+      required:
+      - place
+      - timestamp
+      - type
+      type: object
+      properties:
+        timestamp:
+          type: object
+          properties: {}
+        place:
+          type: string
+        type:
+          type: string
+          enum:
+          - MASK
+          - NOMASK
+        Contact:
+          required:
+          - email
+          - firstName
+          - lastName
+          type: object
+          properties:
+            firstName:
+              type: string
+            lastName:
+              type: string
+            email:
+              type: string
+    ContactModifiyDeclarationWithExternalUser:
+      type: object
+      properties:
+        timestamp:
+            type: object
+            properties: {}
+        place:
+          type: string
+        type:
+          type: string
+          enum:
+          - MASK
+          - NOMASK
+        firstName:
+          type: string
+        lastName:
+          type: string
+    ContactModifiyDeclaration:
+      type: object
+      properties:
+        timestamp:
+            type: object
+            properties: {}
+        place:
+          type: string
+        type:
+          type: string
+          enum:
+          - MASK
+          - NOMASK
+    UserGetByAdmin:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+    UserProfile:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        address:
+          type: string
+        age:
+          type: integer
+          format: int64
+        email:
+          type: string
+        status:
+          type: string
+          enum:
+            - SICK
+            - NOTSICK
+        contactsNumber:
+          type: number
+    Contact:
+      required:
+      - email
+      - firstName
+      - lastName
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+    ContactDeclaration:
+      type: object
+      properties:
+        userId:
+          type: number
+        date:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
