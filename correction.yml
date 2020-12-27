@@ -1,0 +1,504 @@
+openapi: 3.0.1
+info:
+  title: Correction - Tous COVID
+  description: Correction du TP
+  version: 1.0.0
+externalDocs:
+  description: Sujet du TP
+  url: https://docs.google.com/document/d/1xmvuSj5_AzTphgZeT8LRu1RWtI-RsUevq_34zy6DEPI/edit#heading=h.ru4lg114aec2
+servers:
+  - url: http://localhost:8080/api/covid
+tags:
+  - name: contacts
+    description: API relatives aux contacts
+  - name: profile
+    description: API relatives à la gestion de profile de l'utilisateur connecté
+  - name: users
+    description: API relatives à la gestion des utilisateurs
+  - name: covid
+    description: API relatives à la gestion des cas contacts
+paths:
+  /current-user/profile:
+    description: Ressource représentant le profile de l'utilisateur connecté
+    put:
+      summary: met à jour le profile
+      description: écrit le profile de l'utilisateur, comme il n'en a que un et qu'il existe forcément un put suffit
+      tags:
+        - "profile"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Profile'
+      responses:
+        200:
+          description: l'écriture du profil est un succès
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Profile'
+        201:
+          description: Si c'est la création du profil on peut distinguer sur le code retour mais ce n'est pas obligatoire
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Profile'
+        400:
+          $ref: '#/components/responses/badFormatResponse'
+        default:
+          $ref: '#/components/responses/unexpectedResponse'
+    get:
+      tags:
+        - "profile"
+      summary: récupère le profile
+      description: on retourne le profile courant, ce n'était pas demandé
+      responses:
+        200:
+          description: le profil existant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        204:
+          description: aucun profil n'a été défini
+        default:
+          $ref: '#/components/responses/unexpectedResponse'  
+  /current-user/contacts:
+    description: Ressource réprésentant l'ensemble des contacts d'un utilsateur connecté
+    get:
+      summary: liste des contacts
+      description: retourne la liste des contacts de l'utilisateur
+      tags:
+        - "contacts"
+      parameters:
+        - $ref: '#/components/parameters/searchLimit'
+        - $ref: '#/components/parameters/searchOffset'
+      responses:
+        200:
+          description: la liste des résultats, si aucun contact le tableau est vide
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PageData'
+                  - type: object
+                    properties: 
+                      data:
+                        type: array
+                        items: 
+                          $ref: '#/components/schemas/ContactSummary'
+        default:
+          $ref: '#/components/responses/unexpectedResponse'  
+    post:
+      description: |
+        Ajout une contact à la liste des contacts d'une personne
+        c'était une des possibilités pour notifier une liste de contacts
+        même si le sijet indiquait une liste arbitraire sans lien avec un utilisateur
+      summary: notifie la liste des contacts
+      tags:
+        - "contacts"      
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/Contact'
+                - type: object
+                  description: déclaration d'un cas contact à partir d'un identifiant
+                  properties:
+                    id: 
+                      description: identifiant de la personne croisée
+                      type: string
+                    mask:
+                      type: boolean
+                    date:
+                      type: string
+                      format: date-time
+                    place: 
+                      type: string
+                      description: adresse du lieu de contact
+
+      responses:
+        201:
+          description: contact créer avec l'id dans l'objet retour
+          headers:
+            location: 
+              description: l'url à laquelle peut-être récupéré la ressource
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactFull'
+        400:
+          $ref: '#/components/responses/badFormatResponse'
+        default:
+          $ref: '#/components/responses/unexpectedResponse'      
+  /current-user/contacts/{contactId}:
+    description: récupère un contact de l'utilisateur connecté    
+    parameters:
+      - name: contactId
+        in: path
+        required: true
+        schema:
+          type: string
+    delete:
+      tags:
+        - "contacts"      
+      summary: Supprime un contact
+      responses:
+        204:
+          description: le contact est supprimé
+        404:
+          $ref: '#/components/responses/notFoundResponse'
+        default:
+          $ref: '#/components/responses/unexpectedResponse' 
+    put:
+      tags:
+        - "contacts"
+      summary: Met à jour un contact
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Contact'
+      responses:
+        200:
+          description: le contact est mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactFull'
+        400:
+          $ref: '#/components/responses/badFormatResponse'
+        404:
+          $ref: '#/components/responses/notFoundResponse'
+        default:
+          $ref: '#/components/responses/unexpectedResponse'          
+  /current-user/covid:
+    description: Gère le statut covid d'un utilisateur
+    put:
+      summary: met à jour le statut
+      tags:
+        - "covid"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sick:
+                  type: boolean
+                date:
+                  type: string
+                  format: date-time
+      responses:
+        400:
+          $ref: '#/components/responses/badFormatResponse'
+        default:
+          $ref: '#/components/responses/unexpectedResponse'
+  /users:
+    description: Représente l'ensemble des utilisateurs du système, 
+    get:
+      tags:
+        - "users"
+      summary: recherche d'utilisateurs
+      description: recherche d'utilisateur par nom ou mail
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: mail
+          in: query
+          schema:
+            type: string
+            format: mail
+      responses:
+        200: 
+          description: les utilisateurs trouvés, si aucun le tableau data est vide
+          content:
+            application/json:
+              schema:
+                allOf: 
+                  - $ref: '#/components/schemas/PageData'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/UserSummary'
+        400:
+          $ref: '#/components/responses/badFormatResponse'
+        default:
+          $ref: '#/components/responses/unexpectedResponse'
+  /users/notification:
+    description: API technique pour notifier des utilisateurs  
+    post:
+      tags:
+        - "covid"
+      summary: notifie les utilisateurs
+      description: notifie la liste d'id en entrée
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - date
+                - sickPerson
+                - list
+              properties:
+                date:
+                  type: string
+                  format: date-time
+                sickPerson:
+                  description: identifiant du malade
+                  type: string
+                list:
+                  description: liste des identifiants à notifier
+                  type: array
+                  items:
+                    type: string
+      responses:
+        204: 
+          description: la notification a été envoyée avec succès  
+        400:
+          $ref: '#/components/responses/badFormatResponse'
+        default:
+          $ref: '#/components/responses/unexpectedResponse'
+  /users/{userId}/contacts:
+    description: | 
+      Liste des contacts d'un utilisateur, peut être aussi bien utiliser
+      par les administrateurs que les utilisateurs finaux
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema: 
+          type: string
+    get:
+      tags:
+        - "users"
+      summary: liste des contacts d'un utilisateur
+      description: récupère la liste des contacts d'un utilisateur
+      parameters:
+        - $ref: '#/components/parameters/searchLimit'
+        - $ref: '#/components/parameters/searchOffset'
+      responses:
+        200:
+          description: La liste des contacts paginée
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PageData'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: 
+                          $ref:  "#/components/schemas/ContactSummary"
+        400:
+          $ref: '#/components/responses/badFormatResponse'
+        404:
+          $ref:  "#/components/responses/notFoundResponse"
+        default:
+          $ref: '#/components/responses/unexpectedResponse'
+    post:
+      summary: notifie les contacts
+      description: Notifie la liste des contacts d'un utilisateurs
+      tags:
+        - "contacts"
+        - "covid"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+              format: date-time
+      responses:
+        204: 
+          description: La notification a été envoyée avec succès
+        400:
+          $ref: '#/components/responses/badFormatResponse'
+        404: 
+          $ref:  "#/components/responses/notFoundResponse"
+        default:
+          $ref: '#/components/responses/unexpectedResponse'
+components:
+  schemas:
+    Profile:
+      description: Profile de l'utilisateur en entrée
+      type: object
+      properties:
+        name:
+          type: string
+          description: nom de l'utilisateur
+        email:
+          description: mail de l'utilisateur
+          type: string
+          format: mail
+        age:
+          type: integer
+          description: age de l'utilisateur
+        address: 
+          type: string
+          description: addresse de l'utilisateur
+    Error:
+      description: Message d'ereur retournée
+      type: object
+      properties:
+        message: 
+          description: le message d'erreur
+          type: string
+        code: 
+          description: le code de l'erreur
+          type: string
+        type: 
+          description: le type de l'erreur
+          type: string
+          enum:
+            - TECHNICAL
+            - FUNCTIONNAL
+    PageData:
+      description: |
+        Liste de résultat à retourner, on est un peu limité en swagger donc on va surchargé la partie data 
+        qu'on remttra dans chaque objets de type pageData
+      type: object
+      properties:
+        nbResults:
+          type: integer
+          description: le nombre total de résultats retournés dans la page courante
+        totalResults:
+          type: integer
+          description: le nombre total de résultats trouvés
+        data:
+          type: array
+          items: 
+            type: object
+    ContactSummary:
+      type: object
+      description: Résumé d'un contact pour les résultats de recherche
+      properties:
+        id:
+          type: string
+          description: l'identifiant du contact
+        lastname:
+          type: string
+        mail: 
+          type: string
+          format: mail
+        refId:
+          description: identifiant de la person si le contact a été créé à partir d'un ID
+          type: string
+    ContactFull:
+      description: Définition complète d'un contact
+      allOf:
+        - $ref: '#/components/schemas/ContactSummary'
+        - type: object
+          properties:
+            firstname:
+              type: string
+              format: mail
+            mask:
+              type: boolean
+            date: 
+              type: string
+              format: date-time
+            place:
+              type: string
+    Contact:
+      description: utilisé pour la déclaration d'un contact
+      type: object
+      properties:
+        lastname:
+          type: string
+        firstname:
+          type: string
+        mail: 
+          type: string
+          format: mail
+        mask:
+          type: boolean
+        date: 
+          type: string
+          format: date-time
+        place:
+          type: string
+    UserSummary:
+      description: DTO pour la liste retour lors d'une recherche
+      type: object
+      properties:
+        id:
+          type: string
+          description: identifiant de l'utilisateur
+        firstname:
+          type: string
+        lastname: 
+          type: string
+        mail:
+          type: string
+          format: mail
+    User:
+      description: DTO complète d'un utilisateur
+      allOf:
+        - $ref: '#/components/schemas/UserSummary'
+        - type: object
+          properties:
+            age:
+              type: integer
+            address:
+              type: string
+            sick:
+              type: boolean
+            contacts:
+              description: nombre de contact de l'utilisateur
+              type: integer 
+  responses:
+    badFormatResponse:
+      description: Erreur retournée en cas de paramètre d'entrée invalide, dans ce cas le type est FUNCTIONNAL
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example: 
+            type: FUNCTIONNAL
+            code: err.func.bad-format
+            message: the thing parameter is invalid
+    notFoundResponse:
+      description: Erreur retournée si la ressource n'est pas trouvée, dans ce cas le type est FUNCTIONNAL
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example: 
+            type: FUNCTIONNAL
+            code: err.func.not-found
+            message: the resrouce has not been found
+    unexpectedResponse:
+      description: Erreur retournée en cas comportement inattendu, dans ce cas le type est TECHNICAL
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example: 
+            type: TECHNICAL
+            code: err.tech.unexpected
+            message: Something unexpected happened
+  parameters:
+    searchOffset:
+      name: offset
+      description: représente le décalage du nombre de résultat dans le cadre d'une recherche
+      in: query
+      required: false
+      schema:
+        type: integer
+    searchLimit:
+      name: limit
+      description: le nombre de résultat à retourner
+      in: query
+      required: false
+      schema:
+        type: integer  

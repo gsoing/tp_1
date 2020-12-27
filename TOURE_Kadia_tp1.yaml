@@ -8,6 +8,7 @@ info:
 servers:
   - url: http://localhost:8080/
 paths:
+  # Normalement pour une collection on utilise le pluriel
   /user:
     post:
       summary: Créer le profil d'un utilisateur
@@ -23,7 +24,7 @@ paths:
           description: The profil created
           content:
             application/json:
-              schema:
+              schema: # il n'y a pas d'id dans le retour comment tu peux l'utiliser dans /user/{id}
                 $ref: "#/components/schemas/profil"
         '400':
           description: Bad request. User firstname and email must be a string and completed.
@@ -42,7 +43,7 @@ paths:
       description: retounre une liste de tous les utilisateurs présents dans le système
       tags:
         - Gestion du Profil
-      parameters:
+      parameters: # Merci pour la pagination mais j'avais demandé qu'on filtre par mail et nom
         - name: page
           schema: 
             type: integer
@@ -58,7 +59,7 @@ paths:
           description: une page de résultat
           content:
             application/json:    
-              schema:
+              schema: # Pareil il manque des id dans le retour
                 $ref: "#/components/schemas/userList"
         '400':
           description: Bad request. page and pageSize must be an integer and larger than 0.
@@ -130,8 +131,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorDefinition"
-                
+                $ref: "#/components/schemas/errorDefinition"     
   /user/{userId}/covidDeclaration:
     parameters:
       - $ref: "#/components/parameters/userId"
@@ -167,6 +167,9 @@ paths:
                 $ref: "#/components/schemas/errorDefinition"
   /contact:
     post:
+      # Je ne vois pas très bien comment tu fais le lien entre le contact et l'utilisateur qui le déclare
+      # si c'est le champs userID, dans ce cas il me manque un autre id car on peut déclarer un contact
+      # a partir d'un identifiant d'utilisateur
       summary: Créer un cas contact
       tags:
         - Gestion des contacts
@@ -248,6 +251,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/errorDefinition" 
+  # Il est impossible en terme de traitement de faire la différence entre 
+  # /contact/{contactId} et /contact/{userId} si je te donne un exemple ou les id sont des string ou des uid: 
+  # /contact/19fe7c96-1fd3-4b57-99c3-611d2a99e4bf et /contact/7a3e79a6-cc54-4967-ae4e-13bc47121ca9 
+  # comment tu sais quelle méthode correspond à quoi ?
+  # De plus tu as déjà la recherche de contacts par userId dans avec le queryParam userId dans GET /contact ce qui m'allait très bien 
   /contact/{userId}:
     parameters:
       - $ref: "#/components/parameters/userId"

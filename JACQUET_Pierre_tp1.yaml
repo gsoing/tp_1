@@ -34,7 +34,8 @@ paths:
                 $ref: '#/components/schemas/UserWithId'
         '400':
           description: "Invalid information specified"
-    put:
+    put: # Ettnt donné que la ressource users représentet l'ensemble des utilisateurs, il aurait été
+         # pertinant de mettre l'id utilisateur dans l'url
       description: "Modify an UserWithId DTO (the user id must be specified to perform the operation and can not be changed)"
       tags:
       - "Users"
@@ -50,6 +51,8 @@ paths:
           description: "Invalid information specified"
         '404':
           description: "No user associated to the specified ID was found (please not that userid can't be changed)"
+  # Petit bémol sur le nommage des ressources
+  # tu aurais pu utiliser /users?mail={mail}&mail={mail}
   /users/findByEmail:
     get:
       tags:
@@ -79,7 +82,7 @@ paths:
       - "Users"
       - "Admins"
       description: "Return a UserMinimal DTO list (because of namesake) based on the name provided. The MinimalUser object contains the following fields : name, firstname and email"
-      parameters:
+      parameters:   # MERCI POUR LA PAGINATION !!!
         - in: query
           name: name
           schema:
@@ -201,7 +204,7 @@ paths:
                 $ref: '#/components/schemas/ContactWithId'
         '400':
           description: "Missing some contact information"
-    put:
+    put: # Pour plus de cohérence tu aurais pu garder l'id dans l'url
       description: "Modify an existing contact declaration (the contact id can not be changed). The method is based on ContactWithId DTO"
       tags:
       - "Users"
@@ -265,7 +268,7 @@ paths:
             schema:
               $ref: '#/components/schemas/CovidDeclaration'
       responses:
-        '201':
+        '201': # Dans ce cas un 204 est aussi valable
           description: "The declaration was created - nothing is returned"
         '400':
           description: "Missing declaration information or wrong format"

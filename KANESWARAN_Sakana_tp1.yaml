@@ -27,7 +27,7 @@ paths:
       requestBody:
         description: Détail du profil que l'on va ajouter
         content:
-          application/json:
+          application/json: # tu ne retournes pas l'id comment on le trouve pour appeler /profile/{id}
             schema:
               $ref: '#/components/schemas/profil'
           application/xml:
@@ -35,7 +35,7 @@ paths:
               $ref: '#/components/schemas/profil'
         required: true
       responses:
-        200:
+        200: # ici on attend un 201 pour une création
           description: Un nouveau profil a été créé
         400:
           description: La requête est invalide
@@ -53,7 +53,7 @@ paths:
         schema:
             type: integer
       responses:
-        201:
+        201: # 201 veut dire créer donc ici c'est un 200
           description: La modification a bien été prise en compte
         400:
           description: La valeur de l'id n'est pas valide
@@ -78,12 +78,18 @@ paths:
           description: Renvoie le profil de la personne correspondante
           content:
             application/json:
-              schema:
+              schema: # Pourquoi un tableau ? tu as passé l'id donc tu ne peux avoir que 1 profil
                 type: array
                 items:
                   $ref: '#/components/schemas/profil'
         400:
           description: La valeur de l'id n'est pas valide
+  # Alors même si il est possible de valider les pathParam dans les framework qu'on utilise (ce n'est pas le cas de tous)
+  # c'est pas super explicite car si on généralise tes trois ressouces reviennents à /profile/{string}
+  # comment dans ton code tu vas gérer ces 3 cas
+  # tu aurais du mettre soit :
+  # /profil/lastname/{lastname} et /profil/mail/{mail}
+  # ou sinon /profil?name={name}&mail={mail}
   '/profil/{lastname}':
     get:
       tags:
@@ -98,7 +104,8 @@ paths:
         schema:
             type: string
       responses:
-        200:
+        200: #ici j'attendais une liste avec un sous ensemble d'information
+        # si on cherche dupont on est sur de pas avoir 1 résultat
           description: Renvoie l'id de la personne correspondante
           content:
             text/plain:
@@ -128,6 +135,7 @@ paths:
                 type: integer
         400:
           description: La valeur du mail n'est pas valide
+  # Généralement sur des listes on utilises le pluriel
   '/contact/{userId}':
     post:
       tags:
@@ -161,7 +169,7 @@ paths:
         - contact
       summary: Récupérer la liste des contacts d'un utilisateur
       operationId: getContactList
-      parameters:
+      parameters: #paginer aurait été pas mal
       - name: userId
         in: path
         description: userId auquel on veut déclarer un contact
@@ -202,7 +210,7 @@ paths:
               $ref: '#/components/schemas/contact'
         required: true
       responses:
-        '201':
+        '201': # 201 est pour une création 
           description: La modification a bien été prise en compte
         '400':
           description: L'id de l'utilisateur n'est pas valide
@@ -226,7 +234,7 @@ paths:
           schema:
             type: integer
       responses:
-        '201':
+        '201': # c'est encore moins un création on est sur une suppression la donc 200 ou 204
           description: La suppression a bien été prise en compte
         '400':
           description: L'id de l'utilisateur n'est pas valide

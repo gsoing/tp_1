@@ -6,6 +6,7 @@ info:
 servers:
   - url: http://touscovid.swagger.io/api
 paths:
+  # Clairement ici tu vois tes utilisateurs comme une collection, donc user doit être au pluriel
   /user:
     post:
       tags:
@@ -23,6 +24,7 @@ paths:
               $ref: '#/components/schemas/Profile'
         required: true
       responses:
+        # 201 pour une création
         200:
           description: Operation Succes
           content:
@@ -52,6 +54,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Profile'
+        # Alors aucun des 2 
+        # 404 : n'existe pas 
+        # 403 : action interdite
         400:
           description: The profile does not exist or you are not allowed to see it
           content: {}
@@ -84,12 +89,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Profile'
+        # Et les autres cas ?
   /user/{user_id}/contacts:
     get:
       tags:
       - user
       summary: get contacts of current user
-      parameters:
+      parameters: # Mange la pagination
       - name: user_id
         in: path
         description: 'profile id'
@@ -105,6 +111,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Contact'
+        # Et les autres cas ?
+  # Pkoi contact devient singulier maintenant
   /user/{user_id}/contact/person_id/{person_id}:
     post:
       tags:
@@ -140,6 +148,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Contact'
+        # Et les autres cas ?
   /user/{user_id}/contact/person_info:
     post:
       tags:
@@ -169,6 +178,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Contact'
+        # Et les autres cas ?
   /user/{user_id}/contact/{contact_id}:
     get:
       tags:
@@ -194,6 +204,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Contact'
+        # Et les autres cas ?
     put:
       tags:
       - user
@@ -279,19 +290,21 @@ paths:
                 $ref: '#/components/schemas/Covid-Positive-Statement'
   
   
-  
+  # On évite de mettre des actions dans les ressources
+  # cela aurait été plus simple de faire 
+  # GET /admin/users?name={name}&mail={mail} avec les paramètres facultatif
   /admin/search/user/last-name/{last-name}:
     get:
       tags:
       - admin
       summary: get user by last name
-      parameters:
+      parameters: # Manque la pagination
       - name: last-name
         in: path
         description: 'last name of required user'
         required: true
         schema:
-          type: String
+          type: string
       responses:
         200:
           description: Operation Succes
@@ -301,6 +314,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
+  # hum petite erreur dans le nommage de la ressource
   /admin/search/user/lastname/{email}:
     get:
       tags:
@@ -312,7 +326,7 @@ paths:
         description: 'email of required user'
         required: true
         schema:
-          type: String
+          type: string
       responses:
         200:
           description: Operation Succes
@@ -333,7 +347,7 @@ paths:
         description: 'first name of required user'
         required: true
         schema:
-          type: String
+          type: string
       responses:
         200:
           description: Operation Succes
@@ -343,7 +357,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
-  
+  # Pareil user devrait être au pluriel
   /admin/user/{user_id}/profile:
     get:
       tags:
@@ -363,6 +377,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Profile'
+  # Petite incohérence pour /user tu mets contacts au pluriel et ici non 
   /admin/user/{user_id}/contact:
     get:
       tags:
@@ -384,7 +399,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Contact'  
-
+  # Je ne comprends pas très bien le fonctionnement de cette interface tu passe un id de déclaration
+  # puis le body est un tableau de notification qui contient encore la déclaration
   /admin/alert/{statement_id}/notify:
     post:
       tags:

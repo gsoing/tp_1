@@ -23,6 +23,7 @@ tags:
   description: Actions for admin
   
 paths:
+  # Ok pour user au singulier car tu manipule 1 utilisateur
   /user:
     post:
       tags:
@@ -53,7 +54,7 @@ paths:
         400:
           description: Invalid user supplied
           content: {}
-        405:
+        405: 
           description: Invalid input
           content: {}
       x-codegen-request-body-name: body
@@ -81,6 +82,8 @@ paths:
           description: Validation exception
           content: {}
       x-codegen-request-body-name: User
+  # Ici on est sur une recherche donc plusieurs userS, tu aurais pu faire une seule interface
+  # /users?name={name} et /users?mail={mail}
   /user/name/{name}:
     get:
       tags:
@@ -166,6 +169,7 @@ paths:
         404:
           description: User not found
           content: {}
+  # tu n'aurais pu faire que 1 interface en jouant avec le header Accept, techniquement c'est la même interface avec un format de retour différent 
   /user/{userId}/viewProfil:
     get:
       tags:
@@ -196,7 +200,7 @@ paths:
         404:
           description: User not found
           content: {}
-  /user/{IdUser}/covidStatement:
+  /user/{IdUser}/covidStatement: # Alors statement veut dire affirmation, plutot status ici
     put:
       tags:
       - User
@@ -218,7 +222,7 @@ paths:
               $ref: '#/components/schemas/CovidTest'
         required: true
       responses:
-        200:
+        200: # Pkoi retourner un user ? en plus il n'y a pas le statut 
           description: successful operation
           content:
             application/xml:
@@ -234,7 +238,7 @@ paths:
           description: User not found
           content: {}
       x-codegen-request-body-name: body
-  /contact:
+  /contact: # Sur une liste généralement on utilise un pluriel
     post:
       tags:
       - Contact
@@ -300,7 +304,7 @@ paths:
           description: Validation exception
           content: {}
       x-codegen-request-body-name: contact
-  /contact/{id}:
+  /contact/{id}: # Comme tu ne peux pas passer de body tu utilises l'id dans l'url mais ce n'est plus cohérent avec le PUT
     get:
       tags:
       - Contact
@@ -356,7 +360,7 @@ paths:
           description: User not found
           content: {}
   /contact/user/{IdUser}:
-    get:
+    get: # Il aurait fallut paginer, et pour une recherche on passe plutot les paramètres de recherche en queryParma et non pas en pathParam
       tags:
       - Contact
       summary: Find contacts by user
@@ -536,7 +540,7 @@ components:
       - result
       - year
       type: object
-      properties:
+      properties: # ou plus simplement un type date
         day:
           type: integer
         month:
