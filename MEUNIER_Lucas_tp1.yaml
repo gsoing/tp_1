@@ -34,6 +34,7 @@ paths:
               $ref: '#/components/schemas/Profile'
         required: true
       responses:
+        # Lors d'une création est plutot sur une 201
         200:
           description: successful operation
           content:
@@ -43,6 +44,8 @@ paths:
         400:
           description: Invalid input
           content: {}
+  # Pourquoi rajouter /profile on peut considérer que /user/{id} retourne le profile
+  # De plus /user représente 1 utilisateur, il vaudrait mieux utiliser /users
   /user/{user_id}/profile:
     get:
       tags:
@@ -63,6 +66,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Profile'
+        # Peut-être une 404 aussi si l'utilisateur n'existe pas
+        # une erreur 400 ne signale pas un pb de droit une 403 oui par contre
         400:
           description: Invalid input id or method not allowed with this permission
           content: {}
@@ -95,13 +100,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Profile'
-                
+        # 400 et 404 aussi
   /user/{user_id}/contacts:
     get:
       tags:
       - user.contact
       summary: get all contacts of current account
-      parameters:
+      parameters: # Manque la pagination
       - name: user_id
         in: path
         description: 'profile id got during authentification'
@@ -181,6 +186,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Contact'
+  # Pareil ici contact représente une liste, donc contacts
+  # Il manque la gestion des erreurs également
   /user/{user_id}/contact/{contact_id}:
     get:
       tags:
@@ -290,13 +297,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Covid-Declaration'
-  
+  # Pkoi mettre search dans la ressource ? De plus on chercher des utilisateurs donc /users
   /admin/user/search:
     get:
       tags:
       - admin
       summary: get all contacts of current account
-      parameters:
+      parameters: # Manque la pagination
       - name: lastname
         in: query
         description: 'last name of the searched user'
@@ -367,7 +374,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Contact'  
-
+  # Je ne comprends pas très bien le fonctionnement de cette interface tu passe un id de déclaration
+  # puis le body est un tableau de notification qui contient encore la déclaration
   /admin/declaration/{declaration_id}/notify:
     post:
       tags:
@@ -426,6 +434,7 @@ components:
           format: int32
         covidStatus:
           type: string
+          # Ok je connais pas ce verbe mais pkoi pas :D
           enum: 
           - corroned
           - clean

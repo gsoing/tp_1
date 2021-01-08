@@ -78,11 +78,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Profile'
-        405:
+        405: # ici j'aurais dit un 400 qui indique un body incorrect plutôt
+             # qu'une 405 qui indique un mauvais content-type 
           description: Invalid input
           content: {}
       x-codegen-request-body-name: body
   
+  # Plus simplement pkoi pas URL avec des queryParam
+  # de plus si ce sont des listes on utilise des pluriels
+  # /users?mail={mail} et /users?name={name}
+  # Et la pagination aurait été bien
   /user/findPersonByName:
     get:
       tags:
@@ -203,6 +208,8 @@ paths:
           content: {}
       x-codegen-request-body-name: body
   
+  # Je ne comprends pas ce que vient faire l'id utilisateur ici
+  # tu ne t'en sers pas dans la création d'un contact
   /user/findAllContact/{id}:
     get:
       tags:
@@ -230,7 +237,7 @@ paths:
           content: {}
           
   /user/deleteContact/{id}:
-    delete:
+    delete: # On sait déjà que c'est un delete avec la méthode un simple DELETE /user/contact/{id} et en plus tu restais cohérent avec le reste de tes urls
       tags:
       - User
       parameters:
@@ -254,7 +261,7 @@ paths:
         404:
           description: Contact not found
           content: {}
-          
+  # Pareil pour la mise à jour du profil tu n'as pas besoin de l'id pkoi ici tu en as besoin   
   /user/declareCovid/{id}:
     put:
       tags:
@@ -348,6 +355,8 @@ paths:
           description: User not found
           content: {}
   
+  # Pourquoi une action dans ton url alors que dans les autres tu mets la ressources
+  # /admin/users/{id}/profile ou /admin/users/{id}
   /admin/getUserProfile/{id}:
     get:
       tags:
@@ -373,7 +382,7 @@ paths:
         404:
           description: User's profile not found
           content: {}
-  
+  #  Mëme remarque pour pour le user profile tu aurais du utiliser une ressource et non une action
   /admin/getUserContacts/{id}:
     get:
       tags: 
@@ -406,6 +415,8 @@ paths:
       - Admin
       summary: send a notif to several users
       operationId: sendNotification
+      # Je pense qu'il y a une erreur car passer des objets dans l'url ca ma parait pas très lisible
+      # il aurait fallu faire une DTO dédiée
       parameters:
       - name: notif
         in: query
@@ -426,7 +437,7 @@ paths:
       responses:
         200:
           description: List of user contacted by the admin
-          content:
+          content: # Pourquoi retourné un profil ici ?
             application/json:
               schema:
                 type: array
@@ -438,6 +449,7 @@ paths:
           
 components:
   schemas:
+  # Attention les objets manipulés entre la partie utilisateur et admin ne sont pas les mêmes
     Profile:
       required:
       - email

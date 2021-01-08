@@ -14,7 +14,7 @@ paths:
       description: Retourne tout les utilisateurs pour que l'administrateur puisse trouver celui sur lequel travailler.
       tags:
         - users
-      parameters:
+      parameters: # Merci pour la pagination, par contre j'avais demandé à filtrer par nom et mail
         - name: page
           schema: 
             type: integer
@@ -32,7 +32,7 @@ paths:
             application/json:    
               schema:
                 $ref: "#/components/schemas/usersList"
-        '400':
+        '400': # Alors non pas du tout, 400 c'est mauvaise requête donc entrée invalide
           description: network problem. Verify your internet connection
         '500':
           description: the server seems to be down. Retry later
@@ -42,6 +42,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/errorDefinition"
+  # Pourquoi cette ressource au singulier, tu aurais pu continuer avec le pluriel
   /user:
     post:
       summary: Crée un utilisateur depuis le profil afin de respecter le besoin. Cette requête peut être utilisée pour s'inscrire ou pour inscrire un cas contact.
@@ -77,6 +78,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/user"
+        # Une 404 peut-être aussi ?
         '400':
           description: network problem. Verify your internet connection
         '500':
@@ -130,6 +132,7 @@ paths:
           description: network problem. Verify your internet connection
         '500':
           description: the server seems to be down. Retry later
+  # Pareil ca aurait du être un pluriel
   /contact:
     post:
       summary: Permet de créer ou de modifier un contact avec les attributs nécessaires
@@ -138,7 +141,8 @@ paths:
       requestBody:
         content:
           application/json:
-            schema:
+            schema: # Je ne comprends pas comment tu fais le lien entre la personne qui déclare le contact et le contact lui-même
+                    # De plus tu peux déclarer un contact avec une personne à partir de son id et la je ne le vois pas
               $ref: '#/components/schemas/contact'
       responses:
         '200':
@@ -253,6 +257,8 @@ paths:
           description: network problem. Verify your internet connection
         '500':
           description: the server seems to be down. Retry later
+  # Alors je ne comprends pas comment tu peux faire la différence entre /contact/{userid} et /contact/{contactId}
+  # De plus tu as déjà la recherche de contacts par userId dans avec le queryParam userId dans GET /contact ce qui m'allait très bien 
   /contact/{contactId}:
     parameters:
       - $ref: "#/components/parameters/contactId"
@@ -369,7 +375,7 @@ components:
           enum:
            - COVID
            - NO_COVID
-        contacts :
+        contacts : # Je n'avais pas demandé la liste des contacts ici mais le nombre de contacts2
           type: array
           description : liste des contacts de l'utilisateur
           items :

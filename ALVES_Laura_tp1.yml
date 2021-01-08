@@ -38,7 +38,7 @@ paths:
               $ref: '#/components/schemas/UserCreate'
         required: true
       responses:
-        204:
+        204: # Plutot un 201 vu que c'est une création avec l'objet en retour
           description: Profil créé
 
   /user/{id}:
@@ -162,7 +162,7 @@ paths:
         404:
           description: Utilisateur non trouvé
 
-  /user/{email}/contact:
+  /user/{email}/contact: #J'aime beaucoup cette idée d'identifié le user par mail, par contre contacts étant une collection il doit être pluriel
     get:
       tags:
       - Contact
@@ -381,7 +381,7 @@ paths:
         404:
           description: Utilisateur non trouvé
 
-  /admin/contacts/{email}:
+  /admin/contacts/{email}: # La les contacts sont pluriels, attention pour une recherche de ce type il est préférable de passe le filtre (ici le mail) en queryParam
     get:
       tags:
       - Admin
@@ -414,6 +414,7 @@ paths:
           description: Utilisateur non trouvé
 
   /admin/contacts/declaration/{email}:
+  # Le but ici était d'utiliser l'api pour notifier justement comme un déclenchement de mail par exemple
     get:
       tags:
       - Admin

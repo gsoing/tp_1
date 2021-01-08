@@ -100,7 +100,8 @@ paths:
         400:
           description : Fail to update profile
           content: {}
-          
+
+  # tu aurais du garder contacts au pluriel, sinon c'est très bien        
   /user/{id}/contact/{idContact}:
     get:
       tags:
@@ -203,7 +204,7 @@ paths:
       tags:
       - user.contact
       summary: Afficher les contacts du profile
-      parameters:
+      parameters: #Manque la pagination
       - name: id
         in: path
         description: 'Id du profile'
@@ -261,11 +262,11 @@ paths:
  
           
   /admin/user/find:
-    get:
+    get: # Pas besoin de mettre /find le GET /admin/users est suffisant 
       tags:
       - admin
       summary: Un administrateur peut rechercher un utilisateur . On peut supposer qu'il y a des filtres sur la page pour rechercher soit par nom soit par mail.
-      parameters:
+      parameters: # Il manque la pagination
       - name: lastname
         in: query
         description: 'Nom de famille du profile'

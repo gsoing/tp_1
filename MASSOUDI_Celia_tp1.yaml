@@ -12,6 +12,7 @@ tags:
   description: "'user' traite les différentes opérations réalisables par un utilisateur qui s'inscrit sur l'application stop covid. Toutes les opérations décrites, exceptées la création de compte supposent que l'utilisateur soit connectés"
 - name: "admin"
   description: "Cette seconde API s'intéresse aux opérations réalisable par les administrateurs de l'application.Toutes les opérations décrites supposent que l'utilisateur soit connecté"
+# Attention 202 veut dire que la requête a été accepté mais on est pas sur du résultat, mieux vaut utiliser une 200 par défaut
 paths:
   /user:
     post:
@@ -28,10 +29,13 @@ paths:
         schema:
           $ref: "#/components/schemas/User"
       responses:
+        # Pour une création on retourne plutot un 201
         "202":
           description: "User successfully created"
+        # Et ici c'est plutot une 400, une 405 c'est plus quand tu passes du json à la place du xml
         "405":
           description: "Invalid input"
+  # La ressource est au singulier j'en déduis qu'on parle de l'utilisateur courant donc pas besoin de mettre un id
   /user/{id}: 
     put:
       tags:
@@ -44,8 +48,10 @@ paths:
         in: "path"
         description: "name that need to be updated"
         required: true
+        # c'est un id pas besoin de schema
         schema:
           $ref: "#/components/schemas/User"
+      # Je pense que tu voulais dire que c'était dans le body et pas la query
       - in: "query"
         name: "query"
         description: "Updated user object"
@@ -53,10 +59,12 @@ paths:
         schema:
           $ref: "#/components/schemas/User"
       responses:
+        # 204 plutot
         "202":
           description: "User successfully updated"
         "404":
           description: "User not found"
+  # Même remarque que pour la ressource au dessus pas besoin d'id si /user représente l'utilisateur connecté
   /user/{id}/contact:
     post:
       tags:
@@ -71,6 +79,7 @@ paths:
         required: true
         schema:
           $ref: "#/components/schemas/User"
+      # Pareil c'est dans le body
       - in: "query"
         name: "query"
         description: "Information about the contact case : like the place or the date"
@@ -227,7 +236,8 @@ paths:
           description: "User contact successfully find"
         "404":
           description: "The user doesn't exist"  
-          
+  # Je ne comprends pas la logique entre /admin/{mail} et /admin/{mail}/list
+  # Les deux retournent des liste d'utilisateur pas besoin de faire la différence entre les 2
   /admin/{mail}: 
     get:
       tags:
@@ -287,7 +297,7 @@ paths:
           description: "List of user by name successfully find"
         "404":
           description: "No user with this name exist"
-  
+  # Plutot que admin tu aurais pu utiliser /users au pluriel voir /admin/users si tu voulais vraiment marqué la différence
   /admin/{id}: 
     get:
       tags:
@@ -307,7 +317,7 @@ paths:
           description: "User successfully find"
         "404":
           description: "User not exist"
-  
+  # Tu peux laisser contact au pluriel c'est une collection, et on utilise la même ressource pour la recherche
   /admin/{id}/contact: 
     get:
       tags:
@@ -367,6 +377,7 @@ components:
       properties: 
         id: 
           type: string
+        # c'est un détail mais on est plutot sur firstname et lastname
         name: 
           type: string
         surname: 
@@ -395,6 +406,7 @@ components:
     Contact: 
       
       type: object
+      # plus facile d'utiliser un type date mais ok
       required: 
        - user
        - date
@@ -402,6 +414,7 @@ components:
       properties :
         idContact: 
           type : integer
+        #l'id aurait été suffisant
         user : 
           $ref: "#/components/schemas/User"
         date : 
@@ -412,6 +425,7 @@ components:
           type: string
         contactType: 
           type: string
+        # pareil l'id aurait été suffisant
         contactUser:
           $ref: "#/components/schemas/User"
         contactName: 

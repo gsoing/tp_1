@@ -25,7 +25,7 @@ paths:
             schema:      # Request body contents
               $ref: '#/components/schemas/User'
       responses:
-        '201':
+        '201': # Retourner l'objet est nécessaire lorsde la création
           description: OK
         "400":
           description: "Invalid BODY supplied"
@@ -48,7 +48,7 @@ paths:
           description: "Invalid ID supplied"
         "404":
           description: "Order not found"
-    get:
+    get: # Pas très coéhrent avec le reste tu passes les id dans l'url et la en queryParam
       summary: Find user profil by id for the role Admin
       description: The Admin get the informations of the user
       tags:
@@ -80,9 +80,8 @@ paths:
           description: "Invalid ID supplied"
         "404":
           description: "Order not found"
-  
   /user/{userId}:
-    get:
+    get: # Pourquoi utiliser l'id dans l'url ici ? Aucune des urls lié à l'utilisateur ne l'utilise
       summary: Find user profil by ID
       description: In order to update his profil, the user must get the informations of his profil
       tags:
@@ -105,7 +104,7 @@ paths:
           description: "Invalid ID supplied"
         "404":
           description: "Order not found"
-  /user/findByEmail/{userEmail}:
+  /user/findByEmail/{userEmail}: #idem pas logique, pour l'utilisteur tu utilises un queryParam et la repasses en pathParam
     get:
       summary: "Find user by email"
       description: "For each call, the request response is unique"
@@ -120,7 +119,7 @@ paths:
         schema:
           type: string
       responses:
-        "201":
+        "201": # On ne crée rien ici donc un 200 suffit
           description: "successful operation"
           content:
             application/json:
@@ -130,8 +129,8 @@ paths:
           description: "Invalid ID supplied"
         "404":
           description: "Order not found"
-  /user/findByName/{userName} :
-    get:
+  /user/findByName/{userName} : #une seule URL avec deux queryParam suffisait pour la recherche
+    get: # Il manque la pagination
       summary: "Find user by name"
       description: "get the list of user by their names."
       tags:
@@ -215,7 +214,9 @@ paths:
           description: "Invalid ID supplied"
         "404":
           description: "Order not found" 
-  /user/contact/{idContact} :
+  /user/contact/{idContact} : 
+  # Attention changement de logique dans les URL
+  # On était sur /user/{id}/contacts et la on passe sur /user/contact/{id}
     delete:
       tags:
       - "Users"
@@ -247,7 +248,7 @@ paths:
             schema:      # Request body contents
               $ref: '#/components/schemas/CovidDeclaration'
       responses:
-        '201':
+        '201': # On ne crée rien donc soit 200 soit 204, vu qu'il n'y a pas de retour un 204 est plus indiqué
           description: OK
         "400":
           description: "Invalid BODY supplied"

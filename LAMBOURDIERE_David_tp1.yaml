@@ -27,6 +27,8 @@ paths:
       description: |
         Un utilisateur ou un administrateur eut effectuer une recherche parmi les
         utilistateur par Nom ou Email.
+      # Tu aurais pu simplifier en utilisant 2 queryParam factultatif mail et name, ca permet de valider mail directement
+      # Manque la pagination
       parameters:
       - in: query
         name: "by"
@@ -81,6 +83,8 @@ paths:
             application/json:
               schema: 
                 $ref: "#/components/schemas/ApiResponse"
+    # Alors normalement le PUT écrase la ressource, la tu écrases une liste par un objet simple
+    # le put aurait du être faire sur /profiles/{id}, ou alors il fallait utiliser un /profile
     put:
       summary: "Crée ou modifie un profil existant"
       description: |
@@ -126,13 +130,14 @@ paths:
             application/json:
               schema: 
                 $ref: "#/components/schemas/ProfileAdminDTO"
+        # il manque le 404
         400:
           description: "Bad request"
           content: 
             application/json:
               schema: 
                 $ref: "#/components/schemas/ApiResponse"
-
+  # Il manque la mise à jour et la suppression d'un contact
   /contacts/{userId}:
     get:
       tags:
@@ -141,6 +146,7 @@ paths:
       description: |
         Un administrateur peut afficher la liste des contacts d'un utilisateur
         en renseignant l'id de ce dernier.
+      # La pagination aurait été sympa ici aussi
       parameters:
       - in: path
         name: "userId"
@@ -226,6 +232,7 @@ paths:
         required: true
         content: 
           application/json:
+            # Il manque la liste des utilisateurs à notifier2,5
             schema: 
               $ref: "#/components/schemas/Alert"
       responses:
@@ -296,6 +303,7 @@ components:
           example: 12
     ProfileSearchResult:
       type: object
+      # il manque l'id si tu veux faire le get /profiles/{id}
       properties:
         lastname:
           type: string

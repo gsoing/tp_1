@@ -106,7 +106,9 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Contact'
-  /user/{user_id}/person/{person_id}:
+  /user/{user_id}/person/{person_id}: 
+  # Tu aurais pu supprimer cette URL en passant un body différent entre la création d'un contact à partir d'un id et avec les informations complètes
+  # Par contre attention tu parles de contacts et de personnes je comprends le lien entre les deux mais ce n'est pas super explicite, mieux vaut rester sur la même termiologie
     post:
       tags:
       - user
@@ -142,6 +144,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Contact'
   /user/{user_id}/person/person_info:
+   # Tu n'étais pas oubligé de mettre /person_info, le post suffit à comprendre qu'on crée une personne
     post:
       tags:
       - user
@@ -171,6 +174,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Contact'
   /contact/{user_id}/{contact_id}:
+  # Tu as commencé en /user/{id}/contacts, pourquoi basculer en /contact ici, en plus en ajoutant l'id user dans l'url l'id du contact est suffisant
     get:
       tags:
       - user
@@ -249,7 +253,7 @@ paths:
       responses:
         200:
           description: successfully deleted
-  /declaration/{user_id}:
+  /declaration/{user_id}: # Pourquoi ce changement d'url ? On pouvait garder /user/{id}/declaration
     post:
       tags:
       - user
@@ -299,7 +303,9 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
-  /admin/email/user/{email}:
+  /admin/email/user/{email}: 
+  # Cette url n'est très explicite généralement on part du plus générique vers le # plus spécifique /admin/user/email/{email}
+
     get:
       tags:
       - admin
@@ -321,6 +327,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/User'
   /admin/firstname/user/{firstName}:
+  # Même remarque que la précédente, en plus dans le cadre d'une recherche on aurait pu fucionné les 2 avec des query param /admin/user?name={name} et j'avais uniquement demandé par nom pas par prénom
     get:
       tags:
       - admin
